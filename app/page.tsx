@@ -1,13 +1,37 @@
+import Image from "next/image";
+import { homeData } from "./utils/data";
+import Button from "./components/Button";
+import Link from "next/link";
+
 export default function Home() {
-  return (
-    <main>
-      <section className="hero h-screen w-full bg-bg-secondary">Hero</section>
-      <section className="section-container">
-        <div className="main-container vertical-flex items-center">
-          <h1 className="heading-1">Hi I am main container</h1>
-          <p className="paragraph-2">Hi I am paragraph</p>
-        </div>
-      </section>
-    </main>
-  );
+    return (
+        <main>
+            <section className="hero-section">
+                <div className="relative flex h-screen min-h-125 w-full items-center justify-center">
+                    <div className="Image-div absolute top-0 right-0 bottom-0 left-0">
+                        <Image
+                            src={homeData.hero.heroImage}
+                            alt="Hero Image"
+                            quality={100}
+                            fill={true}
+                            loading="eager"
+                            className="h-full w-full object-cover"
+                        />
+                        <div className="absolute top-0 right-0 bottom-0 left-0 bg-bg-base-reverse opacity-30" />
+                    </div>
+                    <div className="text-part relative z-10 flex flex-col items-center gap-12">
+                        <div className="headings overflow-hidden">
+                            <h1 className="heading-1 flex flex-col items-center justify-center gap-0 text-text-on-color">
+                                <span>{homeData.hero.headingPartOne}</span>
+                                <span>{homeData.hero.headingPartTwo}</span>
+                            </h1>
+                        </div>
+                        <Link href={"#"}>
+                            <Button title={homeData.hero.cta} rightIcon />
+                        </Link>
+                    </div>
+                </div>
+            </section>
+        </main>
+    );
 }
