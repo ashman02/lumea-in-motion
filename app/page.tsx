@@ -17,13 +17,17 @@ export default function Home() {
                             loading="eager"
                             className="h-full w-full object-cover"
                         />
-                        <div className="absolute top-0 right-0 bottom-0 left-0 bg-bg-base-reverse opacity-30" />
+                        <div className="absolute top-0 right-0 bottom-0 left-0 bg-bg-base-inverse opacity-30" />
                     </div>
-                    <div className="text-part relative z-10 flex flex-col items-center gap-12">
+                    <div className="text-part relative z-10 flex flex-col items-center gap-12 px-6">
                         <div className="headings overflow-hidden">
                             <h1 className="heading-1 flex flex-col items-center justify-center gap-0 text-text-on-color">
-                                <span>{homeData.hero.headingPartOne}</span>
-                                <span>{homeData.hero.headingPartTwo}</span>
+                                <span className="text-center">
+                                    {homeData.hero.headingPartOne}
+                                </span>
+                                <span className="text-center">
+                                    {homeData.hero.headingPartTwo}
+                                </span>
                             </h1>
                         </div>
                         <Link href={"#"}>

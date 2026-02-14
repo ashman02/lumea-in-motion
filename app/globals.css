@@ -31,7 +31,7 @@
   --color-bg-subtle: var(--neutral-50);
   --color-bg-secondary: var(--neutral-100);
   --color-bg-inactive: var(--neutral-500);
-  --color-bg-base-reverse: var(--neutral-950);
+  --color-bg-base-inverse: var(--neutral-950);
   --color-bg-brand: var(--green-300);
 
   /* Borders */
