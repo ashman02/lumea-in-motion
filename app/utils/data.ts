@@ -3,8 +3,7 @@ import heroImage from "@/public/images/hero-image.jpeg"
 const homeData = {
     hero : {
         heroImage : heroImage,
-        headingPartOne : "Reveal Your",
-        headingPartTwo : "Natural Radiance",
+        heading : "Reveal Your Natural Radiance",
         cta : "Book Your Consultation"
     }
 }
