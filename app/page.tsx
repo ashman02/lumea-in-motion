@@ -150,7 +150,7 @@ export default function Home() {
                             ref={servicesHeadingRef}
                             className="heading-2 max-w-md text-center md:max-w-150 lg:max-w-4xl"
                         >
-                            {homeData.about.heading}
+                            {homeData.services.heading}
                         </h2>
                     </div>
                     <div>
@@ -158,10 +158,42 @@ export default function Home() {
                             ref={servicesContainerRef}
                             className="flex gap-4 md:gap-5 lg:gap-6"
                         >
-                            {homeData.about.treatments.map((t) => (
+                            {homeData.services.treatments.map((t) => (
                                 <ServicesSectionCard key={t.id} treatment={t} />
                             ))}
                         </div>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <div className="main-container flex flex-col items-center gap-10 lg:flex-row lg:gap-24">
+                    <div className="imgContainer relative aspect-square w-full overflow-hidden rounded-4 md:rounded-5 lg:w-1/2 lg:max-w-150 lg:min-w-100 lg:rounded-6">
+                        <Image
+                            src={homeData.about.img}
+                            alt="About Image"
+                            fill
+                            sizes="(max-width: 1023px) 100vw, 600px"
+                            className="h-full w-full object-cover"
+                        />
+                    </div>
+                    <div className="textContainer flex w-full flex-col gap-4 md:gap-5 lg:max-w-200 lg:gap-6">
+                        <div className="headingWrapper">
+                            <h3 className="heading-3">
+                                {homeData.about.heading}
+                            </h3>
+                        </div>
+                        <div className="descriptionWrapper">
+                            <p className="paragraph-1 text-text-subtle">
+                                {homeData.about.description}
+                            </p>
+                        </div>
+                        <Link href={"#"}>
+                            <Button
+                                title={homeData.about.cta}
+                                secondary
+                                rightIcon
+                            />
+                        </Link>
                     </div>
                 </div>
             </section>

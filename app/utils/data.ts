@@ -1,6 +1,7 @@
 import heroImage from "@/public/images/hero-image.jpeg";
 import injectableImage from "@/public/images/service-1.jpg";
 import skinImage from "@/public/images/service-2.jpg";
+import aboutImage from "@/public/images/about-image.jpeg";
 
 const homeData = {
     hero: {
@@ -8,7 +9,7 @@ const homeData = {
         heading: "Reveal Your Natural Radiance",
         cta: "Book Your Consultation",
     },
-    about: {
+    services: {
         heading: "Treatments Tailored to Your Goals",
         treatments: [
             {
@@ -55,6 +56,13 @@ const homeData = {
                 ],
             },
         ],
+    },
+    about: {
+        heading: "Built on Trust, Designed for You",
+        description:
+            "We believe beauty should enhance who you already are never change it. We combine medical expertise with personalized care to deliver treatments that are safe, effective, and thoughtfully tailored to your unique goals. ",
+        cta: "Book Now",
+        img: aboutImage,
     },
 };
 
