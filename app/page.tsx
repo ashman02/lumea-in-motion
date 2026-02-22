@@ -23,6 +23,11 @@ export default function Home() {
     const servicesWrapperRef = useRef<HTMLDivElement>(null);
     const servicesContainerRef = useRef<HTMLDivElement>(null);
 
+    const aboutHeadingRef = useRef<HTMLHeadingElement>(null);
+    const aboutDescriptionRef = useRef<HTMLParagraphElement>(null);
+    const aboutButtonRef = useRef<HTMLAnchorElement>(null);
+    const aboutImageRef = useRef<HTMLDivElement>(null);
+
     useGSAP(() => {
         // Hero Section Animations
         SplitText.create(heroHeadingRef.current, {
@@ -56,7 +61,7 @@ export default function Home() {
         // Services Section Animations
         headingAnimationFunction(
             servicesHeadingRef.current,
-            servicesSectionRef.current,
+            servicesHeadingRef.current,
         );
 
         const mm = gsap.matchMedia();
@@ -97,6 +102,36 @@ export default function Home() {
                 });
             },
         );
+
+        // About Section Animations
+        headingAnimationFunction(
+            aboutHeadingRef.current,
+            aboutHeadingRef.current,
+        );
+        headingAnimationFunction(
+            aboutDescriptionRef.current,
+            aboutDescriptionRef.current,
+        );
+        gsap.from(aboutImageRef.current, {
+            y: 100,
+            opacity: 0,
+            duration: 0.6,
+            ease: "power1.out",
+            scrollTrigger: {
+                trigger: aboutImageRef.current,
+                start: "top 80%",
+            },
+        });
+        gsap.from(aboutButtonRef.current, {
+            y: 48,
+            opacity: 0,
+            duration: 0.6,
+            ease: "power1.out",
+            scrollTrigger: {
+                trigger: aboutButtonRef.current,
+                start: "top 90%",
+            },
+        });
     }, []);
 
     return (
@@ -167,7 +202,10 @@ export default function Home() {
             </section>
             <section>
                 <div className="main-container flex flex-col items-center gap-10 lg:flex-row lg:gap-24">
-                    <div className="imgContainer relative aspect-square w-full overflow-hidden rounded-4 md:rounded-5 lg:w-1/2 lg:max-w-150 lg:min-w-100 lg:rounded-6">
+                    <div
+                        ref={aboutImageRef}
+                        className="imgContainer relative aspect-square w-full overflow-hidden rounded-4 md:rounded-5 lg:w-1/2 lg:max-w-150 lg:min-w-100 lg:rounded-6"
+                    >
                         <Image
                             src={homeData.about.img}
                             alt="About Image"
@@ -177,17 +215,20 @@ export default function Home() {
                         />
                     </div>
                     <div className="textContainer flex w-full flex-col gap-4 md:gap-5 lg:max-w-200 lg:gap-6">
-                        <div className="headingWrapper">
-                            <h3 className="heading-3">
+                        <div className="headingWrapper overflow-hidden">
+                            <h3 ref={aboutHeadingRef} className="heading-3">
                                 {homeData.about.heading}
                             </h3>
                         </div>
-                        <div className="descriptionWrapper">
-                            <p className="paragraph-1 text-text-subtle">
+                        <div className="descriptionWrapper overflow-hidden">
+                            <p
+                                ref={aboutDescriptionRef}
+                                className="paragraph-1 text-text-subtle"
+                            >
                                 {homeData.about.description}
                             </p>
                         </div>
-                        <Link href={"#"}>
+                        <Link ref={aboutButtonRef} href={"#"}>
                             <Button
                                 title={homeData.about.cta}
                                 secondary
@@ -197,6 +238,7 @@ export default function Home() {
                     </div>
                 </div>
             </section>
+            <section className="h-screen bg-bg-secondary"></section>
         </main>
     );
 }
