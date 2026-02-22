@@ -22,7 +22,6 @@ export default function Home() {
     const servicesHeadingRef = useRef<HTMLHeadingElement>(null);
     const servicesWrapperRef = useRef<HTMLDivElement>(null);
     const servicesContainerRef = useRef<HTMLDivElement>(null);
-    const servicesExtraRef = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
         // Hero Section Animations
@@ -76,6 +75,7 @@ export default function Home() {
 
                 const getScrollAmountY = () => {
                     if (!servicesContainerRef.current) return 0;
+                    // we have to consider both sides of padding that is why 128 not 64
                     const padding = isDesktop ? 128 : isTablet ? 64 : 48;
                     const value =
                         servicesContainerRef.current.scrollWidth +
@@ -83,7 +83,7 @@ export default function Home() {
                         window.innerWidth;
                     return value;
                 };
-
+                // we are starting animation from bottom on bigger screens (but we have to improve this one because bigger screens can have bigger heights as well.)
                 gsap.to(servicesContainerRef.current, {
                     x: () => -getScrollAmountY(),
                     scrollTrigger: {
@@ -109,6 +109,7 @@ export default function Home() {
                             alt="Hero Image"
                             quality={100}
                             fill={true}
+                            sizes="100vw"
                             loading="eager"
                             className="h-full w-full object-cover"
                         />
@@ -152,7 +153,7 @@ export default function Home() {
                             {homeData.about.heading}
                         </h2>
                     </div>
-                    <div ref={servicesExtraRef} className="">
+                    <div>
                         <div
                             ref={servicesContainerRef}
                             className="flex gap-4 md:gap-5 lg:gap-6"
@@ -164,7 +165,6 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-            <section className="h-screen bg-bg-secondary"></section>
         </main>
     );
 }

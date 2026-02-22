@@ -19,62 +19,75 @@ const ServicesSectionCard = ({ treatment }: Props) => {
     const serviceCardOverlayRef = useRef<HTMLDivElement>(null);
     const serviceCardTextPartRef = useRef<HTMLDivElement>(null);
 
-    const { contextSafe } = useGSAP();
+    const { contextSafe } = useGSAP(() => {
+        if (!serviceCardTextPartRef.current) return;
+
+        // for the sake of smooth animation we are letting gsap to set transform on card
+        const mm = gsap.matchMedia();
+
+        mm.add("(min-width: 1024px)", () => {
+            const height = serviceCardTextPartRef.current!.clientHeight;
+
+            gsap.set(serviceCardTextPartRef.current, {
+                y: height - 33,
+            });
+        });
+
+        return () => mm.revert();
+    });
 
     // eslint-disable-next-line react-hooks/refs
     const handleMouseEnterCard = contextSafe(() => {
         // using matchmedia so hover effect wont trigger on smaller screens
-        const mm = gsap.matchMedia();
-        mm.add("(min-width: 1024px)", () => {
-            if (tl.current) {
-                tl.current.kill();
-            }
-            tl.current = gsap.timeline({
-                defaults: {
-                    duration: 0.3,
-                    ease: "sine.inOut",
-                },
-            });
-            tl.current
-                .to(serviceCardOverlayRef.current, {
-                    opacity: 0.4,
-                })
-                .to(
-                    serviceCardTextPartRef.current,
-                    {
-                        y: 0,
-                    },
-                    "<",
-                );
+        if (window.innerWidth < 1024) return;
+
+        if (tl.current) {
+            tl.current.kill();
+        }
+        tl.current = gsap.timeline({
+            defaults: {
+                duration: 0.3,
+                ease: "sine.inOut",
+            },
         });
+        tl.current
+            .to(serviceCardOverlayRef.current, {
+                opacity: 0.4,
+            })
+            .to(
+                serviceCardTextPartRef.current,
+                {
+                    y: 0,
+                },
+                "<",
+            );
     });
     // eslint-disable-next-line react-hooks/refs
     const handleMouseLeaveCard = contextSafe(() => {
-        const mm = gsap.matchMedia();
-        mm.add("(min-width: 1024px)", () => {
-            if (!serviceCardTextPartRef.current) return;
+        if (window.innerWidth < 1024) return;
 
-            if (tl.current) {
-                tl.current.kill();
-            }
-            tl.current = gsap.timeline({
-                defaults: {
-                    duration: 0.3,
-                    ease: "sine.inOut",
-                },
-            });
-            tl.current
-                .to(serviceCardOverlayRef.current, {
-                    opacity: 0.2,
-                })
-                .to(
-                    serviceCardTextPartRef.current,
-                    {
-                        y: serviceCardTextPartRef.current.clientHeight - 33,
-                    },
-                    "<",
-                );
+        if (!serviceCardTextPartRef.current) return;
+
+        if (tl.current) {
+            tl.current.kill();
+        }
+        tl.current = gsap.timeline({
+            defaults: {
+                duration: 0.3,
+                ease: "sine.inOut",
+            },
         });
+        tl.current
+            .to(serviceCardOverlayRef.current, {
+                opacity: 0.2,
+            })
+            .to(
+                serviceCardTextPartRef.current,
+                {
+                    y: serviceCardTextPartRef.current.clientHeight - 33,
+                },
+                "<",
+            );
     });
 
     return (
@@ -99,7 +112,7 @@ const ServicesSectionCard = ({ treatment }: Props) => {
             </div>
             <div
                 ref={serviceCardTextPartRef}
-                className="text-details absolute bottom-6 left-6 z-10 flex flex-col gap-4 lg:translate-y-[calc(100%-33px)]"
+                className="text-details absolute bottom-6 left-6 z-10 flex flex-col gap-4"
             >
                 <h3 className="heading-3-body text-text-on-color">
                     {treatment.name}
