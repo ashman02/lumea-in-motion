@@ -2,6 +2,12 @@ import heroImage from "@/public/images/hero-image.jpeg";
 import injectableImage from "@/public/images/service-1.jpg";
 import skinImage from "@/public/images/service-2.jpg";
 import aboutImage from "@/public/images/about-image.jpeg";
+import r1 from "@/public/images/bf-1.jpeg";
+import r2 from "@/public/images/bf-2.jpeg";
+import r3 from "@/public/images/bf-3.jpeg";
+import r4 from "@/public/images/bf-4.jpeg";
+import r5 from "@/public/images/bf-5.jpeg";
+import r6 from "@/public/images/bf-6.jpeg";
 
 const homeData = {
     hero: {
@@ -63,6 +69,12 @@ const homeData = {
             "We believe beauty should enhance who you already are never change it. We combine medical expertise with personalized care to deliver treatments that are safe, effective, and thoughtfully tailored to your unique goals. ",
         cta: "Book Now",
         img: aboutImage,
+    },
+    result: {
+        heading: "Results That Speak for Themselves",
+        subHeading:
+            "See the transformations our clients have experienced—subtle enhancements that honor individuality and reveal confidence.",
+        images: [r1, r2, r3, r4, r5, r6],
     },
 };
 

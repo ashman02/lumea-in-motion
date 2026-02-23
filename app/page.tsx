@@ -9,7 +9,10 @@ import { useRef } from "react";
 import { SplitText } from "gsap/SplitText";
 import ServicesSectionCard from "./components/ServicesSectionCard";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { headingAnimationFunction } from "./utils/gsapAnim";
+import {
+    headingAnimationFunction,
+    pinnedVerticalScrollAnimation,
+} from "./utils/gsapAnim";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -27,6 +30,11 @@ export default function Home() {
     const aboutDescriptionRef = useRef<HTMLParagraphElement>(null);
     const aboutButtonRef = useRef<HTMLAnchorElement>(null);
     const aboutImageRef = useRef<HTMLDivElement>(null);
+
+    const resultHeadingRef = useRef<HTMLHeadingElement>(null);
+    const resultSubheadingRef = useRef<HTMLParagraphElement>(null);
+    const resultWrapperRef = useRef<HTMLDivElement>(null);
+    const resultImagesContainerRef = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
         // Hero Section Animations
@@ -64,44 +72,7 @@ export default function Home() {
             servicesHeadingRef.current,
         );
 
-        const mm = gsap.matchMedia();
-        mm.add(
-            {
-                isDesktop: "(min-width: 1024px)",
-                isTablet: "(min-width: 768px) and (max-width: 1023px)",
-                isMobile: "(max-width: 767px)",
-            },
-            (context) => {
-                const { isDesktop, isTablet } = context.conditions as {
-                    isDesktop: boolean;
-                    isTablet: boolean;
-                    isMobile: boolean;
-                };
-
-                const getScrollAmountY = () => {
-                    if (!servicesContainerRef.current) return 0;
-                    // we have to consider both sides of padding that is why 128 not 64
-                    const padding = isDesktop ? 128 : isTablet ? 64 : 48;
-                    const value =
-                        servicesContainerRef.current.scrollWidth +
-                        padding -
-                        window.innerWidth;
-                    return value;
-                };
-                // we are starting animation from bottom on bigger screens (but we have to improve this one because bigger screens can have bigger heights as well.)
-                gsap.to(servicesContainerRef.current, {
-                    x: () => -getScrollAmountY(),
-                    scrollTrigger: {
-                        trigger: servicesWrapperRef.current,
-                        start: isDesktop ? "bottom bottom" : "top top",
-                        end: () => `+=${getScrollAmountY()}`,
-                        pin: true,
-                        scrub: true,
-                        invalidateOnRefresh: true,
-                    },
-                });
-            },
-        );
+        pinnedVerticalScrollAnimation(servicesContainerRef, servicesWrapperRef);
 
         // About Section Animations
         headingAnimationFunction(
@@ -132,6 +103,21 @@ export default function Home() {
                 start: "top 90%",
             },
         });
+
+        // Result Section Animations
+        headingAnimationFunction(
+            resultHeadingRef.current,
+            resultHeadingRef.current,
+        );
+        headingAnimationFunction(
+            resultSubheadingRef.current,
+            resultSubheadingRef.current,
+        );
+
+        pinnedVerticalScrollAnimation(
+            resultImagesContainerRef,
+            resultWrapperRef,
+        );
     }, []);
 
     return (
@@ -235,6 +221,53 @@ export default function Home() {
                                 rightIcon
                             />
                         </Link>
+                    </div>
+                </div>
+            </section>
+            <section className="result-section section-container">
+                <div
+                    ref={resultWrapperRef}
+                    className="main-container vertical-flex"
+                >
+                    <div className="heading-subheading-container flex flex-col items-center gap-4 md:gap-8">
+                        <div className="heading-container overflow-hidden">
+                            <h2
+                                ref={resultHeadingRef}
+                                className="heading-2 max-w-md text-center md:max-w-150 lg:max-w-4xl"
+                            >
+                                {homeData.result.heading}
+                            </h2>
+                        </div>
+                        <div className="subheading-container overflow-hidden">
+                            <p
+                                ref={resultSubheadingRef}
+                                className="paragraph-1 max-w-md text-center text-text-subtle md:max-w-150 lg:max-w-4xl"
+                            >
+                                {homeData.result.subHeading}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="">
+                        <div
+                            ref={resultImagesContainerRef}
+                            className="flex gap-4 md:gap-5 lg:gap-6"
+                        >
+                            {homeData.result.images.map((img, idx) => (
+                                <div
+                                    key={idx}
+                                    className="relative aspect-400/500 w-full shrink-0 overflow-hidden rounded-4 md:w-100 md:rounded-5 lg:rounded-6 2xl:w-1/4"
+                                >
+                                    <Image
+                                        src={img}
+                                        alt="Before and after image"
+                                        width={400}
+                                        height={500}
+                                        className="h-full w-full object-cover"
+                                    />
+                                    <div className="absolute top-0 right-0 bottom-0 left-0 bg-bg-base-inverse opacity-10" />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>
