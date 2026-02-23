@@ -24,7 +24,7 @@ const headingAnimationFunction = (
     });
 };
 
-const pinnedVerticalScrollAnimation = (
+const pinnedHorizontalScrollAnimation = (
     scrollContainer: RefObject<HTMLDivElement | null>,
     wrapperContainer: RefObject<HTMLDivElement | null>,
 ) => {
@@ -68,4 +68,4 @@ const pinnedVerticalScrollAnimation = (
     );
 };
 
-export { headingAnimationFunction, pinnedVerticalScrollAnimation };
+export { headingAnimationFunction, pinnedHorizontalScrollAnimation };

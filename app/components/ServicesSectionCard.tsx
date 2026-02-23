@@ -18,6 +18,7 @@ const ServicesSectionCard = ({ treatment }: Props) => {
     const tl = useRef<GSAPTimeline>(null);
     const serviceCardOverlayRef = useRef<HTMLDivElement>(null);
     const serviceCardTextPartRef = useRef<HTMLDivElement>(null);
+    const serviceCardImageRef = useRef<HTMLImageElement>(null);
 
     const { contextSafe } = useGSAP(() => {
         if (!serviceCardTextPartRef.current) return;
@@ -55,6 +56,13 @@ const ServicesSectionCard = ({ treatment }: Props) => {
                 opacity: 0.4,
             })
             .to(
+                serviceCardImageRef.current,
+                {
+                    scale: 1,
+                },
+                "<",
+            )
+            .to(
                 serviceCardTextPartRef.current,
                 {
                     y: 0,
@@ -82,6 +90,13 @@ const ServicesSectionCard = ({ treatment }: Props) => {
                 opacity: 0.2,
             })
             .to(
+                serviceCardImageRef.current,
+                {
+                    scale: 1.1,
+                },
+                "<",
+            )
+            .to(
                 serviceCardTextPartRef.current,
                 {
                     y: serviceCardTextPartRef.current.clientHeight - 33,
@@ -98,12 +113,13 @@ const ServicesSectionCard = ({ treatment }: Props) => {
         >
             <div className="img-container relative h-full w-full">
                 <Image
+                    ref={serviceCardImageRef}
                     src={treatment.img}
                     alt={treatment.name}
                     width={500}
                     height={540}
                     quality={100}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover scale-110"
                 />
                 <div
                     ref={serviceCardOverlayRef}

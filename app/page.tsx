@@ -11,7 +11,7 @@ import ServicesSectionCard from "./components/ServicesSectionCard";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
     headingAnimationFunction,
-    pinnedVerticalScrollAnimation,
+    pinnedHorizontalScrollAnimation,
 } from "./utils/gsapAnim";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
@@ -72,7 +72,7 @@ export default function Home() {
             servicesHeadingRef.current,
         );
 
-        pinnedVerticalScrollAnimation(servicesContainerRef, servicesWrapperRef);
+        pinnedHorizontalScrollAnimation(servicesContainerRef, servicesWrapperRef);
 
         // About Section Animations
         headingAnimationFunction(
@@ -114,7 +114,7 @@ export default function Home() {
             resultSubheadingRef.current,
         );
 
-        pinnedVerticalScrollAnimation(
+        pinnedHorizontalScrollAnimation(
             resultImagesContainerRef,
             resultWrapperRef,
         );
