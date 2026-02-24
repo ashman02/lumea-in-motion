@@ -13,6 +13,7 @@ import {
     headingAnimationFunction,
     pinnedHorizontalScrollAnimation,
 } from "./utils/gsapAnim";
+import TestimonialSection from "./components/TestimonialSection";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
@@ -274,62 +275,7 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-            <section className="testimonial-section section-container">
-                <div className="main-container vertical-flex">
-                    <div className="heading-container">
-                        <h2 className="heading-2">
-                            {homeData.testimonial.heading}
-                        </h2>
-                    </div>
-                    <div>
-                        <div className="flex gap-6 md:gap-8 lg:gap-16">
-                            {homeData.testimonial.testimonials.map((t) => (
-                                <div
-                                    key={t.name}
-                                    className="flex min-h-140 w-full shrink-0 flex-col gap-10 rounded-4 border border-border-base bg-bg-base p-6 md:min-h-102 md:rounded-5 md:p-9 lg:min-h-120 lg:gap-16 lg:rounded-6 lg:p-14"
-                                >
-                                    <div className="quote-svg h-16 w-16 lg:h-20 lg:w-20">
-                                        <svg
-                                            viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="var(--color-text-brand)"
-                                        >
-                                            <g
-                                                id="SVGRepo_bgCarrier"
-                                                strokeWidth="0"
-                                            ></g>
-                                            <g
-                                                id="SVGRepo_tracerCarrier"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            ></g>
-                                            <g id="SVGRepo_iconCarrier">
-                                                {" "}
-                                                <g>
-                                                    {" "}
-                                                    <path
-                                                        fill="none"
-                                                        d="M0 0h24v24H0z"
-                                                    ></path>{" "}
-                                                    <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 0 1-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 0 1-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z"></path>{" "}
-                                                </g>{" "}
-                                            </g>
-                                        </svg>
-                                    </div>
-                                    <div className="text-part flex flex-col gap-10">
-                                        <p className="paragraph-0 text-text-subtle lg:max-w-250">
-                                            {t.content}
-                                        </p>
-                                        <h5 className="paragraph-1">
-                                            {t.name}
-                                        </h5>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <TestimonialSection/>
         </main>
     );
 }
