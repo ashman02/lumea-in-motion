@@ -1,17 +1,21 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { homeData } from "../utils/data";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { headingAnimationFunction } from "../utils/gsapAnim";
+import { Draggable } from "gsap/all";
 
-gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(useGSAP, Draggable);
 
 const TestimonialSection = () => {
     const testimonialHeadingRef = useRef<HTMLHeadingElement>(null);
     const testimonialWrapperRef = useRef<HTMLDivElement>(null);
     const testimonialArrowRef = useRef<HTMLDivElement>(null);
     const testimonialCarouselRef = useRef<HTMLDivElement>(null);
+
+    // state for index to calculate pagination
+    const [activeIndex, setActiveIndex] = useState(0);
 
     // we are using extented sildes for inifinite loop (we are adding one extra first in the last and one extar last in the first)
     const testiSlides = homeData.testimonial.testimonials;
@@ -22,38 +26,10 @@ const TestimonialSection = () => {
     ];
 
     useGSAP(() => {
-        if (!testimonialArrowRef.current || !testimonialWrapperRef.current)
-            return;
-
         headingAnimationFunction(
             testimonialHeadingRef.current,
             testimonialHeadingRef.current,
         );
-
-        // Initial State of our arrow
-        gsap.set(testimonialArrowRef.current, {
-            scale: 0,
-            opacity: 0,
-        });
-
-        // We are going to use quickTo to animate our arrow (Gsap best practice when we are changing same value of a same target. In our case we are changing x and y)
-        const xTo = gsap.quickTo(testimonialArrowRef.current, "x", {
-            duration: 0.3,
-            ease: "power3.out",
-        });
-
-        const yTo = gsap.quickTo(testimonialArrowRef.current, "y", {
-            duration: 0.3,
-            ease: "power3.out",
-        });
-
-        // Now we need one for the rotation of the arrow
-        const rotateTo = gsap.quickTo(testimonialArrowRef.current, "rotation", {
-            duration: 0.3,
-            ease: "power3.out",
-        });
-
-        // Remember after doing this all wrap every function with contextSafe
 
         // Carousel code
         const totalSlides = testiSlides.length;
@@ -62,138 +38,253 @@ const TestimonialSection = () => {
 
         let isAnimating = false;
 
-        // set initial position
-        gsap.set(testimonialCarouselRef.current, {
-            xPercent: -100 * currentIndex,
-        });
+        const updateActiveDot = () => {
+            const realIndex =
+                currentIndex === 0
+                    ? totalSlides - 1
+                    : currentIndex === totalSlides + 1
+                      ? 0
+                      : currentIndex - 1;
 
-        const handleArrowClick = () => {
-            if (!testimonialCarouselRef.current || isAnimating) return;
+            setActiveIndex(realIndex);
+        };
 
-            isAnimating = true;
+        updateActiveDot();
 
-            const rotation = gsap.getProperty(
-                testimonialArrowRef.current,
-                "rotation",
-            ) as number;
-            if (rotation === 0) {
-                currentIndex++;
-            } else {
-                currentIndex--;
-            }
+        const mm = gsap.matchMedia();
+        // arrow animation for desktop
+        mm.add("(min-width: 1024px)", () => {
+            if (!testimonialArrowRef.current || !testimonialWrapperRef.current)
+                return;
 
-            gsap.to(testimonialCarouselRef.current, {
+            // set initial position
+            gsap.set(testimonialCarouselRef.current, {
                 xPercent: -100 * currentIndex,
-                duration: 0.6,
-                ease: "power3.inOut",
-                onComplete: () => {
-                    // If we hit the fake last clone
-                    if (currentIndex === totalSlides + 1) {
-                        currentIndex = 1;
-                        gsap.set(testimonialCarouselRef.current, {
-                            xPercent: -100 * currentIndex,
-                        });
-                    }
-
-                    // If we hit the fake first clone
-                    if (currentIndex === 0) {
-                        currentIndex = totalSlides;
-                        gsap.set(testimonialCarouselRef.current, {
-                            xPercent: -100 * currentIndex,
-                        });
-                    }
-
-                    isAnimating = false;
-                },
             });
-        };
 
-        // visible the mouse when pointer enters in the section
-        const handleMouseEnter = () => {
-            gsap.to(testimonialArrowRef.current, {
-                scale: 1,
-                opacity: 1,
-                duration: 0.3,
-                ease: "sine.inOut",
-            });
-        };
-
-        // When pointer is moving in the section make arrow to follow the pointer
-        const handleMouseMove = (e: PointerEvent) => {
-            if (!testimonialWrapperRef.current) return;
-            // we are calculating bounds on every event call but we can store that when mouse enter's in the wrapper and reuse those as well. (performance optimization for later)
-            const bounds =
-                testimonialWrapperRef.current.getBoundingClientRect();
-
-            // cursor position relative to the section
-            const x = e.clientX - bounds.left;
-            const y = e.clientY - bounds.top;
-
-            // smoothly animate
-            xTo(x);
-            yTo(y);
-
-            // 🔥 Determine arrow direction based on horizontal position
-            const halfWidth = bounds.width / 2;
-
-            if (x < halfWidth) {
-                // Cursor is in left half → show left arrow
-                rotateTo(180);
-            } else {
-                // Cursor is in right half → show right arrow
-                rotateTo(0);
-            }
-        };
-
-        // hide the mouse when pointer leaves the section
-        const handleMouseLeave = () => {
-            gsap.to(testimonialArrowRef.current, {
+            // Initial State of our arrow
+            gsap.set(testimonialArrowRef.current, {
                 scale: 0,
                 opacity: 0,
-                duration: 0.3,
-                ease: "sine.inOut",
             });
-        };
 
-        // add listeners to the section
-        testimonialWrapperRef.current.addEventListener(
-            "pointerenter",
-            handleMouseEnter,
-        );
-        testimonialWrapperRef.current.addEventListener(
-            "pointermove",
-            handleMouseMove,
-        );
-        testimonialWrapperRef.current.addEventListener(
-            "pointerleave",
-            handleMouseLeave,
-        );
+            // We are going to use quickTo to animate our arrow (Gsap best practice when we are changing same value of a same target. In our case we are changing x and y)
+            const xTo = gsap.quickTo(testimonialArrowRef.current, "x", {
+                duration: 0.3,
+                ease: "power3.out",
+            });
 
-        // we are adding click event on the wrapper not on the arrow
-        testimonialWrapperRef.current.addEventListener(
-            "click",
-            handleArrowClick,
-        );
+            const yTo = gsap.quickTo(testimonialArrowRef.current, "y", {
+                duration: 0.3,
+                ease: "power3.out",
+            });
 
-        // clean up
-        return () => {
-            testimonialWrapperRef.current?.removeEventListener(
+            // Now we need one for the rotation of the arrow
+            const rotateTo = gsap.quickTo(
+                testimonialArrowRef.current,
+                "rotation",
+                {
+                    duration: 0.3,
+                    ease: "power3.out",
+                },
+            );
+
+            // Remember after doing this all wrap every function with contextSafe
+
+            const handleArrowClick = () => {
+                if (!testimonialCarouselRef.current || isAnimating) return;
+
+                isAnimating = true;
+
+                const rotation = gsap.getProperty(
+                    testimonialArrowRef.current,
+                    "rotation",
+                ) as number;
+                if (rotation === 0) {
+                    currentIndex++;
+                } else {
+                    currentIndex--;
+                }
+
+                gsap.to(testimonialCarouselRef.current, {
+                    xPercent: -100 * currentIndex,
+                    duration: 0.6,
+                    ease: "power3.inOut",
+                    onComplete: () => {
+                        // If we hit the fake last clone
+                        if (currentIndex === totalSlides + 1) {
+                            currentIndex = 1;
+                            gsap.set(testimonialCarouselRef.current, {
+                                xPercent: -100 * currentIndex,
+                            });
+                        }
+
+                        // If we hit the fake first clone
+                        if (currentIndex === 0) {
+                            currentIndex = totalSlides;
+                            gsap.set(testimonialCarouselRef.current, {
+                                xPercent: -100 * currentIndex,
+                            });
+                        }
+
+                        isAnimating = false;
+                    },
+                });
+            };
+
+            // visible the mouse when pointer enters in the section
+            const handleMouseEnter = () => {
+                gsap.to(testimonialArrowRef.current, {
+                    scale: 1,
+                    opacity: 1,
+                    duration: 0.3,
+                    ease: "sine.inOut",
+                });
+            };
+
+            // When pointer is moving in the section make arrow to follow the pointer
+            const handleMouseMove = (e: PointerEvent) => {
+                if (!testimonialWrapperRef.current) return;
+                // we are calculating bounds on every event call but we can store that when mouse enter's in the wrapper and reuse those as well. (performance optimization for later)
+                const bounds =
+                    testimonialWrapperRef.current.getBoundingClientRect();
+
+                // cursor position relative to the section
+                const x = e.clientX - bounds.left;
+                const y = e.clientY - bounds.top;
+
+                // smoothly animate
+                xTo(x);
+                yTo(y);
+
+                // 🔥 Determine arrow direction based on horizontal position
+                const halfWidth = bounds.width / 2;
+
+                if (x < halfWidth) {
+                    // Cursor is in left half → show left arrow
+                    rotateTo(180);
+                } else {
+                    // Cursor is in right half → show right arrow
+                    rotateTo(0);
+                }
+            };
+
+            // hide the mouse when pointer leaves the section
+            const handleMouseLeave = () => {
+                gsap.to(testimonialArrowRef.current, {
+                    scale: 0,
+                    opacity: 0,
+                    duration: 0.3,
+                    ease: "sine.inOut",
+                });
+            };
+
+            // add listeners to the section
+            testimonialWrapperRef.current.addEventListener(
                 "pointerenter",
                 handleMouseEnter,
             );
-            testimonialWrapperRef.current?.removeEventListener(
+            testimonialWrapperRef.current.addEventListener(
                 "pointermove",
                 handleMouseMove,
             );
-            testimonialWrapperRef.current?.removeEventListener(
+            testimonialWrapperRef.current.addEventListener(
                 "pointerleave",
                 handleMouseLeave,
             );
-            testimonialWrapperRef.current?.removeEventListener(
+
+            // we are adding click event on the wrapper not on the arrow
+            testimonialWrapperRef.current.addEventListener(
                 "click",
                 handleArrowClick,
             );
-        };
+
+            // clean up
+            return () => {
+                testimonialWrapperRef.current?.removeEventListener(
+                    "pointerenter",
+                    handleMouseEnter,
+                );
+                testimonialWrapperRef.current?.removeEventListener(
+                    "pointermove",
+                    handleMouseMove,
+                );
+                testimonialWrapperRef.current?.removeEventListener(
+                    "pointerleave",
+                    handleMouseLeave,
+                );
+                testimonialWrapperRef.current?.removeEventListener(
+                    "click",
+                    handleArrowClick,
+                );
+            };
+        });
+
+        // drag and pagination animation for mobile and desktop
+        mm.add("(max-width: 1023px)", () => {
+            const wrapper = testimonialWrapperRef.current!;
+            const carousel = testimonialCarouselRef.current!;
+            const slideWidth = wrapper.offsetWidth;
+
+            // Set initial pixel position
+            gsap.set(carousel, {
+                x: -slideWidth * currentIndex,
+            });
+
+            const dragInstance = Draggable.create(carousel, {
+                type: "x",
+                edgeResistance: 0.85,
+                inertia: false,
+
+                bounds: {
+                    minX: -slideWidth * (totalSlides + 1),
+                    maxX: 0,
+                },
+
+                onDragStart: () => {
+                    isAnimating = true;
+                },
+
+                onDragEnd: function () {
+                    const draggedX = this.x;
+
+                    // Calculate nearest index properly
+                    const newIndex = Math.round(
+                        Math.abs(draggedX) / slideWidth,
+                    );
+
+                    currentIndex = newIndex;
+
+                    gsap.to(carousel, {
+                        x: -slideWidth * currentIndex,
+                        duration: 0.4,
+                        ease: "power3.out",
+                        onComplete: () => {
+                            // Infinite loop reset logic
+                            if (currentIndex === totalSlides + 1) {
+                                currentIndex = 1;
+                                gsap.set(carousel, {
+                                    x: -slideWidth * currentIndex,
+                                });
+                            }
+
+                            if (currentIndex === 0) {
+                                currentIndex = totalSlides;
+                                gsap.set(carousel, {
+                                    x: -slideWidth * currentIndex,
+                                });
+                            }
+                            updateActiveDot();
+                            isAnimating = false;
+                        },
+                    });
+                },
+            })[0];
+
+            return () => {
+                dragInstance.kill();
+            };
+        });
     }, []);
 
     return (
@@ -260,7 +351,7 @@ const TestimonialSection = () => {
                     </div>
                     <div
                         ref={testimonialArrowRef}
-                        className="arrow pointer-events-none absolute -top-8 -left-10 z-10 flex h-18 w-18 items-center justify-center rounded-full border border-border-base bg-blend-difference backdrop-blur-xs will-change-transform"
+                        className="arrow pointer-events-none absolute -top-8 -left-10 z-10 hidden h-18 w-18 items-center justify-center rounded-full border border-border-base bg-blend-difference backdrop-blur-xs will-change-transform lg:flex"
                     >
                         <svg
                             viewBox="0 0 24 24"
@@ -284,6 +375,36 @@ const TestimonialSection = () => {
                                 ></path>
                             </g>
                         </svg>
+                    </div>
+                    {/* Pagination Dots */}
+                    <div className="mt-6 flex justify-center gap-3 lg:hidden">
+                        {testiSlides.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => {
+                                    const wrapper =
+                                        testimonialWrapperRef.current!;
+                                    const carousel =
+                                        testimonialCarouselRef.current!;
+                                    const slideWidth = wrapper.offsetWidth;
+
+                                    const targetIndex = index + 1;
+
+                                    gsap.to(carousel, {
+                                        x: -slideWidth * targetIndex,
+                                        duration: 0.4,
+                                        ease: "power3.out",
+                                    });
+
+                                    setActiveIndex(index);
+                                }}
+                                className={`h-2 w-2 rounded-full transition-all duration-300 ${
+                                    activeIndex === index
+                                        ? "w-6 bg-text-base"
+                                        : "bg-border-base"
+                                }`}
+                            />
+                        ))}
                     </div>
                 </div>
             </div>
