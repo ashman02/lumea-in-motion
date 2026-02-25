@@ -13,6 +13,14 @@ const TestimonialSection = () => {
     const testimonialArrowRef = useRef<HTMLDivElement>(null);
     const testimonialCarouselRef = useRef<HTMLDivElement>(null);
 
+    // we are using extented sildes for inifinite loop (we are adding one extra first in the last and one extar last in the first)
+    const testiSlides = homeData.testimonial.testimonials;
+    const extendedSlides = [
+        testiSlides[testiSlides.length - 1], // last one
+        ...testiSlides,
+        testiSlides[0], // first
+    ];
+
     useGSAP(() => {
         if (!testimonialArrowRef.current || !testimonialWrapperRef.current)
             return;
@@ -48,11 +56,21 @@ const TestimonialSection = () => {
         // Remember after doing this all wrap every function with contextSafe
 
         // Carousel code
-        const totalSlides = homeData.testimonial.testimonials.length;
-        let currentIndex = 0;
+        const totalSlides = testiSlides.length;
+        // we are starting from one because 0th is cloned (last) one.
+        let currentIndex = 1;
+
+        let isAnimating = false;
+
+        // set initial position
+        gsap.set(testimonialCarouselRef.current, {
+            xPercent: -100 * currentIndex,
+        });
 
         const handleArrowClick = () => {
-            if (!testimonialCarouselRef.current) return;
+            if (!testimonialCarouselRef.current || isAnimating) return;
+
+            isAnimating = true;
 
             const rotation = gsap.getProperty(
                 testimonialArrowRef.current,
@@ -64,14 +82,29 @@ const TestimonialSection = () => {
                 currentIndex--;
             }
 
-            // Clamp index so it doesn't overflow
-            currentIndex = Math.max(0, Math.min(currentIndex, totalSlides - 1));
-
-            // Animate track
             gsap.to(testimonialCarouselRef.current, {
                 xPercent: -100 * currentIndex,
                 duration: 0.6,
                 ease: "power3.inOut",
+                onComplete: () => {
+                    // If we hit the fake last clone
+                    if (currentIndex === totalSlides + 1) {
+                        currentIndex = 1;
+                        gsap.set(testimonialCarouselRef.current, {
+                            xPercent: -100 * currentIndex,
+                        });
+                    }
+
+                    // If we hit the fake first clone
+                    if (currentIndex === 0) {
+                        currentIndex = totalSlides;
+                        gsap.set(testimonialCarouselRef.current, {
+                            xPercent: -100 * currentIndex,
+                        });
+                    }
+
+                    isAnimating = false;
+                },
             });
         };
 
@@ -179,9 +212,9 @@ const TestimonialSection = () => {
                         ref={testimonialCarouselRef}
                         className="flex w-full will-change-transform"
                     >
-                        {homeData.testimonial.testimonials.map((t) => (
+                        {extendedSlides.map((t, idx) => (
                             <div
-                                key={t.name}
+                                key={idx}
                                 className="w-full shrink-0 cursor-pointer px-6 md:px-8 lg:px-16"
                             >
                                 <div className="flex min-h-140 w-full flex-col gap-10 rounded-4 border border-border-base bg-bg-base p-6 md:min-h-102 md:rounded-5 md:p-9 lg:min-h-120 lg:gap-16 lg:rounded-6 lg:p-14">
