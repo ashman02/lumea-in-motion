@@ -8,12 +8,12 @@ import { headingAnimationFunction } from "../utils/gsapAnim";
 gsap.registerPlugin(useGSAP);
 
 const TestimonialSection = () => {
-    const testimonialSectionRef = useRef<HTMLElement>(null);
+    const testimonialWrapperRef = useRef<HTMLDivElement>(null);
     const testimonialArrowRef = useRef<HTMLDivElement>(null);
     const testimonialHeadingRef = useRef<HTMLHeadingElement>(null);
 
     useGSAP(() => {
-        if (!testimonialArrowRef.current || !testimonialSectionRef.current)
+        if (!testimonialArrowRef.current || !testimonialWrapperRef.current)
             return;
 
         headingAnimationFunction(
@@ -23,8 +23,6 @@ const TestimonialSection = () => {
 
         // Initial State of our arrow
         gsap.set(testimonialArrowRef.current, {
-            xPercent: -50,
-            yPercent: -50,
             scale: 0,
             opacity: 0,
         });
@@ -52,9 +50,9 @@ const TestimonialSection = () => {
 
         // When pointer is moving in the section make arrow to follow the pointer
         const handleMouseMove = (e: PointerEvent) => {
-            if (!testimonialSectionRef.current) return;
+            if (!testimonialWrapperRef.current) return;
             const bounds =
-                testimonialSectionRef.current.getBoundingClientRect();
+                testimonialWrapperRef.current.getBoundingClientRect();
 
             // cursor position relative to the section
             const x = e.clientX - bounds.left;
@@ -76,30 +74,30 @@ const TestimonialSection = () => {
         };
 
         // add listeners to the section
-        testimonialSectionRef.current.addEventListener(
+        testimonialWrapperRef.current.addEventListener(
             "pointerenter",
             handleMouseEnter,
         );
-        testimonialSectionRef.current.addEventListener(
+        testimonialWrapperRef.current.addEventListener(
             "pointermove",
             handleMouseMove,
         );
-        testimonialSectionRef.current.addEventListener(
+        testimonialWrapperRef.current.addEventListener(
             "pointerleave",
             handleMouseLeave,
         );
 
         // clean up
         return () => {
-            testimonialSectionRef.current?.removeEventListener(
+            testimonialWrapperRef.current?.removeEventListener(
                 "pointerenter",
                 handleMouseEnter,
             );
-            testimonialSectionRef.current?.removeEventListener(
+            testimonialWrapperRef.current?.removeEventListener(
                 "pointermove",
                 handleMouseMove,
             );
-            testimonialSectionRef.current?.removeEventListener(
+            testimonialWrapperRef.current?.removeEventListener(
                 "pointerleave",
                 handleMouseLeave,
             );
@@ -107,44 +105,17 @@ const TestimonialSection = () => {
     }, []);
 
     return (
-        <section
-            ref={testimonialSectionRef}
-            className="testimonial-section section-container relative"
-        >
-            <div
-                ref={testimonialArrowRef}
-                className="arrow absolute z-10 flex h-12 w-12 items-center justify-center rounded-full bg-bg-secondary"
-            >
-                <svg
-                    viewBox="0 0 24 24"
-                    height={24}
-                    width={24}
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                    <g
-                        id="SVGRepo_tracerCarrier"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                        <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"
-                            fill={"var(--color-text-base)"}
-                        ></path>
-                    </g>
-                </svg>
-            </div>
-            <div className="main-container vertical-flex">
-                <div className="heading-container">
+        <section className="testimonial-section section-container relative">
+            <div className="section-container vertical-flex">
+                <div className="heading-container px-6 md:px-8 lg:px-16">
                     <h2 ref={testimonialHeadingRef} className="heading-2">
                         {homeData.testimonial.heading}
                     </h2>
                 </div>
-                <div>
+                <div
+                    ref={testimonialWrapperRef}
+                    className="relative px-6 md:px-8 lg:px-16"
+                >
                     <div className="flex gap-6 md:gap-8 lg:gap-16">
                         {homeData.testimonial.testimonials.map((t) => (
                             <div
@@ -187,6 +158,33 @@ const TestimonialSection = () => {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                    <div
+                        ref={testimonialArrowRef}
+                        className="arrow absolute -top-8 -left-10 z-10 flex h-18 w-18 items-center justify-center rounded-full border border-border-base bg-blend-difference backdrop-blur-xs will-change-transform"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            height={40}
+                            width={40}
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                            <g
+                                id="SVGRepo_tracerCarrier"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            ></g>
+                            <g id="SVGRepo_iconCarrier">
+                                <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"
+                                    fill={"var(--color-text-base)"}
+                                ></path>
+                            </g>
+                        </svg>
                     </div>
                 </div>
             </div>
