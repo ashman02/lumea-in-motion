@@ -38,6 +38,12 @@ const TestimonialSection = () => {
             ease: "power3.out",
         });
 
+        // Now we need one for the rotation of the arrow
+        const rotateTo = gsap.quickTo(testimonialArrowRef.current, "rotation", {
+            duration: 0.3,
+            ease: "power3.out",
+        });
+
         // visible the mouse when pointer enters in the section
         const handleMouseEnter = () => {
             gsap.to(testimonialArrowRef.current, {
@@ -51,6 +57,7 @@ const TestimonialSection = () => {
         // When pointer is moving in the section make arrow to follow the pointer
         const handleMouseMove = (e: PointerEvent) => {
             if (!testimonialWrapperRef.current) return;
+            // we are calculating bounds on every event call but we can store that when mouse enter's in the wrapper and reuse those as well. (performance optimization for later)
             const bounds =
                 testimonialWrapperRef.current.getBoundingClientRect();
 
@@ -61,6 +68,17 @@ const TestimonialSection = () => {
             // smoothly animate
             xTo(x);
             yTo(y);
+
+            // 🔥 Determine arrow direction based on horizontal position
+            const halfWidth = bounds.width / 2;
+
+            if (x < halfWidth) {
+                // Cursor is in left half → show left arrow
+                rotateTo(180);
+            } else {
+                // Cursor is in right half → show right arrow
+                rotateTo(0);
+            }
         };
 
         // hide the mouse when pointer leaves the section
