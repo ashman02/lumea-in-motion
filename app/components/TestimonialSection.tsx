@@ -25,7 +25,7 @@ const TestimonialSection = () => {
         testiSlides[0], // first
     ];
 
-    useGSAP(() => {
+    const {contextSafe} = useGSAP(() => {
         headingAnimationFunction(
             testimonialHeadingRef.current,
             testimonialHeadingRef.current,
@@ -91,7 +91,7 @@ const TestimonialSection = () => {
 
             // Remember after doing this all wrap every function with contextSafe
 
-            const handleArrowClick = () => {
+            const handleArrowClick = contextSafe(() => {
                 if (!testimonialCarouselRef.current || isAnimating) return;
 
                 isAnimating = true;
@@ -130,20 +130,20 @@ const TestimonialSection = () => {
                         isAnimating = false;
                     },
                 });
-            };
+            });
 
             // visible the mouse when pointer enters in the section
-            const handleMouseEnter = () => {
+            const handleMouseEnter = contextSafe(() => {
                 gsap.to(testimonialArrowRef.current, {
                     scale: 1,
                     opacity: 1,
                     duration: 0.3,
                     ease: "sine.inOut",
                 });
-            };
+            });
 
             // When pointer is moving in the section make arrow to follow the pointer
-            const handleMouseMove = (e: PointerEvent) => {
+            const handleMouseMove = contextSafe((e: PointerEvent) => {
                 if (!testimonialWrapperRef.current) return;
                 // we are calculating bounds on every event call but we can store that when mouse enter's in the wrapper and reuse those as well. (performance optimization for later)
                 const bounds =
@@ -167,17 +167,17 @@ const TestimonialSection = () => {
                     // Cursor is in right half → show right arrow
                     rotateTo(0);
                 }
-            };
+            });
 
             // hide the mouse when pointer leaves the section
-            const handleMouseLeave = () => {
+            const handleMouseLeave = contextSafe(() => {
                 gsap.to(testimonialArrowRef.current, {
                     scale: 0,
                     opacity: 0,
                     duration: 0.3,
                     ease: "sine.inOut",
                 });
-            };
+            });
 
             // add listeners to the section
             testimonialWrapperRef.current.addEventListener(
