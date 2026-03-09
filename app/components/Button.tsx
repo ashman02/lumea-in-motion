@@ -8,6 +8,7 @@ interface ButtonProps {
     onBtnClick?: () => void;
     rightIcon?: boolean;
     secondary?: boolean;
+    medium?: boolean;
 }
 
 gsap.registerPlugin(useGSAP);
@@ -17,6 +18,7 @@ const Button = ({
     onBtnClick,
     rightIcon = false,
     secondary = false,
+    medium = false,
 }: ButtonProps) => {
     const { contextSafe } = useGSAP();
     const btnTl = useRef<GSAPTimeline>(null);
@@ -141,11 +143,15 @@ const Button = ({
             onClick={onBtnClick}
             onMouseEnter={handleBtnMouseEnter}
             onMouseLeave={handleBtnMouseLeave}
-            className="flex h-12 cursor-pointer gap-0"
+            className="flex cursor-pointer gap-0"
+            style={{
+                height: medium ? "40px" : "48px",
+            }}
         >
             <div
                 className="text-content button-1 relative flex h-full w-full items-center justify-center overflow-hidden rounded-full px-8"
                 style={{
+                    paddingInline: medium ? "24px" : "32px",
                     backgroundColor: secondary
                         ? "transparent"
                         : "var(--color-bg-brand)",
@@ -177,7 +183,7 @@ const Button = ({
                 />
             </div>
             <div
-                className="icon relative flex h-full min-w-12 items-center justify-center overflow-hidden rounded-full"
+                className="icon relative flex h-full items-center justify-center overflow-hidden rounded-full"
                 style={{
                     display: rightIcon ? "flex" : "none",
                     backgroundColor: secondary
@@ -186,6 +192,7 @@ const Button = ({
                     border: secondary
                         ? "1px solid var(--color-border-base-inverse)"
                         : "none",
+                    minWidth: medium ? "40px" : "48px",
                 }}
             >
                 <svg
