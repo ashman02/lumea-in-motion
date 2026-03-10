@@ -5,8 +5,9 @@ import React, { useRef } from "react";
 import Button from "./Button";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const Navbar = () => {
     const path = usePathname();
@@ -18,7 +19,83 @@ const Navbar = () => {
     const headerRef = useRef<HTMLElement>(null);
     const isAnimating = useRef<boolean>(false);
 
-    const { contextSafe } = useGSAP();
+    const { contextSafe } = useGSAP(() => {
+        // we are using matchmedia because for mobile and tablet we have to animate menu as well
+        const mm = gsap.matchMedia();
+        mm.add(
+            {
+                isDesktop: "(min-width: 1024px)",
+                isTablet: "(min-width: 768px) and (max-width: 1023px)",
+                isMobile: "(max-width: 767px)",
+            },
+            (context) => {
+                const { isDesktop } = context.conditions as {
+                    isDesktop: boolean;
+                };
+
+                let lastScroll = 0;
+                const threshold = 10; // prevents micro scroll jitter
+
+                // we have defined tweens and play them according to our need
+                const showAnim = gsap
+                    .from(headerRef.current, {
+                        y: -88,
+                        paused: true,
+                        duration: 0.25,
+                        ease: "power2.out",
+                    })
+                    .progress(1);
+                const showAnimMenu = gsap
+                    .from(menuRef.current, {
+                        y: -88,
+                        paused: true,
+                        duration: 0.25,
+                        ease: "power2.out",
+                    })
+                    .progress(1);
+
+                ScrollTrigger.create({
+                    start: "top top",
+                    end: 99999,
+                    onUpdate: (self) => {
+                        if (isMenuOpen.current) return;
+
+                        const scroll = self.scroll();
+                        const diff = scroll - lastScroll;
+
+                        // always show navbar near top
+                        if (scroll < 80) {
+                            showAnim.play();
+                            if (!isDesktop) {
+                                showAnimMenu.play();
+                            }
+                            lastScroll = scroll;
+                            return;
+                        }
+
+                        // ignore micro movements
+                        if (Math.abs(diff) < threshold) return;
+
+                        if (diff > 0) {
+                            // scrolling down
+                            showAnim.timeScale(1.8).reverse();
+                            if (!isDesktop) {
+                                showAnimMenu.timeScale(1.8).reverse();
+                            }
+                        } else {
+                            // scrolling up
+                            showAnim.timeScale(1).play();
+                            if (!isDesktop) {
+                                showAnimMenu.timeScale(1).play();
+                            }
+                        }
+
+                        lastScroll = scroll;
+                    },
+                });
+            },
+        );
+    }, []);
 
     // Instead of guessing get the original values of header left right top bottom
     const getHeaderClip = () => {
