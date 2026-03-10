@@ -20,6 +20,18 @@ const Navbar = () => {
     const isAnimating = useRef<boolean>(false);
 
     const { contextSafe } = useGSAP(() => {
+        gsap.from(headerRef.current, {
+            yPercent: -150,
+            opacity: 0,
+            duration: 0.5,
+            ease: "power3.out",
+        });
+        gsap.from(menuRef.current, {
+            yPercent: -150,
+            opacity: 0,
+            duration: 0.5,
+            ease: "power3.out",
+        });
         // we are using matchmedia because for mobile and tablet we have to animate menu as well
         const mm = gsap.matchMedia();
         mm.add(
