@@ -141,6 +141,12 @@ const Button = ({
     return (
         <button
             onClick={onBtnClick}
+            onTouchStart={(e) => {
+                e.preventDefault();
+            }}
+            onTouchEnd={(e) => {
+                e.preventDefault();
+            }}
             onMouseEnter={handleBtnMouseEnter}
             onMouseLeave={handleBtnMouseLeave}
             className="flex cursor-pointer gap-0"

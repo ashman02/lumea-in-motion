@@ -3,146 +3,167 @@
 /* We have foundation colors that we are going to use in semantic colors. So we will create Root for foundation colors and use those in theme for semantic colors */
 
 :root {
-  /* Neutral Color Palette */
-  --neutral-white: #ffffff;
-  --neutral-50: #f6f8f6;
-  --neutral-100: #ebf0eb;
-  --neutral-200: #dce3dd;
-  --neutral-300: #cbd6cc;
-  --neutral-400: #95a196;
-  --neutral-500: #818f82;
-  --neutral-600: #515c52;
-  --neutral-700: #2b302b;
-  --neutral-800: #212621;
-  --neutral-900: #1a1f1a;
-  --neutral-950: #151a15;
+    /* Neutral Color Palette */
+    --neutral-white: #ffffff;
+    --neutral-50: #f6f8f6;
+    --neutral-100: #ebf0eb;
+    --neutral-200: #dce3dd;
+    --neutral-300: #cbd6cc;
+    --neutral-400: #95a196;
+    --neutral-500: #818f82;
+    --neutral-600: #515c52;
+    --neutral-700: #2b302b;
+    --neutral-800: #212621;
+    --neutral-900: #1a1f1a;
+    --neutral-950: #151a15;
 
-  /* Green Color Palette */
-  --green-100: #edfcee;
-  --green-300: #9aa79b;
-  --green-500: #4e544e;
+    /* Green Color Palette */
+    --green-100: #edfcee;
+    --green-300: #9aa79b;
+    --green-500: #4e544e;
 }
 
 @theme {
-  --color-*: initial;
-  /* Backgrounds */
-  --color-bg-page-body: var(--neutral-50);
-  --color-bg-base: var(--neutral-white);
-  --color-bg-subtle: var(--neutral-50);
-  --color-bg-secondary: var(--neutral-100);
-  --color-bg-inactive: var(--neutral-500);
-  --color-bg-base-inverse: var(--neutral-950);
-  --color-bg-brand: var(--green-300);
+    --color-*: initial;
+    /* Backgrounds */
+    --color-bg-page-body: var(--neutral-50);
+    --color-bg-base: var(--neutral-white);
+    --color-bg-subtle: var(--neutral-50);
+    --color-bg-secondary: var(--neutral-100);
+    --color-bg-inactive: var(--neutral-500);
+    --color-bg-base-inverse: var(--neutral-950);
+    --color-bg-brand: var(--green-300);
 
-  /* Borders */
-  --color-border-subtle: var(--neutral-100);
-  --color-border-base: var(--neutral-200);
-  --color-border-strong: var(--neutral-300);
-  --color-border-base-inverse: var(--neutral-700);
-  --color-border-brand: var(--green-300);
+    /* Borders */
+    --color-border-subtle: var(--neutral-100);
+    --color-border-base: var(--neutral-200);
+    --color-border-strong: var(--neutral-300);
+    --color-border-base-inverse: var(--neutral-700);
+    --color-border-brand: var(--green-300);
 
-  /* Text */
-  --color-text-base: var(--neutral-950);
-  --color-text-subtle: var(--neutral-600);
-  --color-text-inactive: var(--neutral-500);
-  --color-text-on-color: var(--neutral-50);
-  --color-text-base-inverse: var(--neutral-50);
-  --color-text-subtle-inverse: var(--neutral-400);
-  --color-text-brand: var(--green-300);
+    /* Text */
+    --color-text-base: var(--neutral-950);
+    --color-text-subtle: var(--neutral-600);
+    --color-text-inactive: var(--neutral-500);
+    --color-text-on-color: var(--neutral-50);
+    --color-text-base-inverse: var(--neutral-50);
+    --color-text-subtle-inverse: var(--neutral-400);
+    --color-text-brand: var(--green-300);
 
-  /* Typography Sizes */
-  --text-*: initial;
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.5rem;
-  --text-2xl: 1.75rem;
-  --text-3xl: 2rem;
-  --text-4xl: 2.25rem;
-  --text-5xl: 3rem;
-  --text-6xl: 3.25rem;
-  --text-7xl: 4rem;
-  --text-8xl: 4.25rem;
-  --text-9xl: 5.5rem;
+    /* Typography Sizes */
+    --text-*: initial;
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.25rem;
+    --text-xl: 1.5rem;
+    --text-2xl: 1.75rem;
+    --text-3xl: 2rem;
+    --text-4xl: 2.25rem;
+    --text-5xl: 3rem;
+    --text-6xl: 3.25rem;
+    --text-7xl: 4rem;
+    --text-8xl: 4.25rem;
+    --text-9xl: 5.5rem;
 
-  /* Typogrpahy Line Heights */
-  --leading-*: initial;
-  --leading-extra-tight: 0.9;
-  --leading-none: 1;
-  --leading-tight: 1.1;
-  --leading-snug: 1.2;
-  --leading-normal: 1.3;
-  --leading-relaxed: 1.4;
-  --leading-loose: 1.5;
+    /* Typogrpahy Line Heights */
+    --leading-*: initial;
+    --leading-extra-tight: 0.9;
+    --leading-none: 1;
+    --leading-tight: 1.1;
+    --leading-snug: 1.2;
+    --leading-normal: 1.3;
+    --leading-relaxed: 1.4;
+    --leading-loose: 1.5;
 
-  /* Border Radius */
-  --radius-*: initial;
-  --radius-1: 0.25rem;
-  --radius-2: 0.5rem;
-  --radius-3: 0.75rem;
-  --radius-4: 1rem;
-  --radius-5: 1.25rem;
-  --radius-6: 1.5rem;
-  --radius-full: 9999px;
+    /* Border Radius */
+    --radius-*: initial;
+    --radius-1: 0.25rem;
+    --radius-2: 0.5rem;
+    --radius-3: 0.75rem;
+    --radius-4: 1rem;
+    --radius-5: 1.25rem;
+    --radius-6: 1.5rem;
+    --radius-full: 9999px;
 
-  /* Custom breakpoint for bigger screens */
-  --breakpoint-2xl : 112rem;
+    /* Custom breakpoint for bigger screens */
+    --breakpoint-2xl: 112rem;
+
+    /* Custom Easing Curver from Emil & Benjamin */
+
+    --ease-in-quad: cubic-bezier (0.55, 0.085, 0.68, 0.53);
+    --ease-in-cubic: cubic-bezier (0.55, 0.055, 0.675, 0.19);
+    --ease-in-quart: cubic-bezier (0.895, 0.03, 0.685, 0.22);
+    --ease-in-quint: cubic-bezier (0.755, 0.05, 0.855, 0.06);
+    --ease-in-expo: cubic-bezier (0.95, 0.05, 0.795, 0.035);
+    --ease-in-circ: cubic-bezier (0.6, 0.04, 0.98, 0.335);
+    --ease-out-quad: cubic-bezier (0.25, 0.46, 0.45, 0.94);
+    --ease-out-cubic: cubic-bezier (0.215, 0.61, 0.355, 1);
+    --ease-out-quart: cubic-bezier (0.165, 0.84, 0.44, 1);
+    --ease-out-quint: cubic-bezier (0.23, 1, 0.32, 1);
+    --ease-out-expo: cubic-bezier (0.19, 1, 0.22, 1);
+    --ease-out-circ: cubic-bezier (0.075, 0.82, 0.165, 1);
+    --ease-in-out-quad: cubic-bezier (0.455, 0.03, 0.515, 0.955);
+    --ease-in-out-cubic: cubic-bezier (0.645, 0.045, 0.355, 1);
+    --ease-in-out-quart: cubic-bezier (0.77, 0, 0.175, 1);
+    --ease-in-out-quint: cubic-bezier (0.86, 0, 0.07, 1);
+    --ease-in-out-expo: cubic-bezier (1, 0, 0, 1);
+    --ease-in-out-circ: cubic-bezier (0.785, 0.135, 0.15, 0.86);
 }
 
 @theme inline {
-  --font-heading: var(--font-playfair);
-  --font-secondary: var(--font-inter);
+    --font-heading: var(--font-playfair);
+    --font-secondary: var(--font-inter);
 }
 
 body {
-  background: var(--color-bg-page-body);
-  color: var(--color-text-base);
-  font-family: var(--font-secondary);
+    background: var(--color-bg-page-body);
+    color: var(--color-text-base);
+    font-family: var(--font-secondary);
 }
 
 /* Utility classes */
 
 .section-container {
-  @apply pt-12 pb-12 md:pt-16 md:pb-13 lg:pt-21;
+    @apply pt-12 pb-12 md:pt-16 md:pb-13 lg:pt-21;
 }
 
 .main-container {
-  @apply px-6 pt-12 pb-12 md:px-8 md:pt-16 md:pb-13 lg:px-16 lg:pt-21;
+    @apply px-6 pt-12 pb-12 md:px-8 md:pt-16 md:pb-13 lg:px-16 lg:pt-21;
 }
 
 .vertical-flex {
-  @apply flex flex-col gap-8 md:gap-12;
+    @apply flex flex-col gap-8 md:gap-12;
 }
 
 .heading-1 {
-  @apply font-heading text-6xl leading-extra-tight tracking-tight md:text-8xl lg:text-9xl;
+    @apply font-heading text-6xl leading-extra-tight tracking-tight md:text-8xl lg:text-9xl;
 }
 
 .heading-2 {
-  @apply font-heading text-4xl leading-extra-tight tracking-tight md:text-5xl lg:text-7xl;
+    @apply font-heading text-4xl leading-extra-tight tracking-tight md:text-5xl lg:text-7xl;
 }
 
 .heading-3 {
-  @apply font-heading text-2xl leading-none tracking-tight md:text-3xl lg:text-4xl;
+    @apply font-heading text-2xl leading-none tracking-tight md:text-3xl lg:text-4xl;
 }
 
 .heading-3-body {
-  @apply font-secondary text-2xl leading-none font-semibold tracking-tight md:text-3xl lg:text-4xl;
+    @apply font-secondary text-2xl leading-none font-semibold tracking-tight md:text-3xl lg:text-4xl;
 }
 
 .paragraph-0 {
-  @apply font-secondary text-2xl leading-snug md:text-3xl lg:text-4xl;
+    @apply font-secondary text-2xl leading-snug md:text-3xl lg:text-4xl;
 }
 
 .paragraph-1 {
-  @apply font-secondary text-lg leading-normal md:text-xl;
+    @apply font-secondary text-lg leading-normal md:text-xl;
 }
 
 .paragraph-2 {
-  @apply font-secondary text-base leading-relaxed;
+    @apply font-secondary text-base leading-relaxed;
 }
 
 .button-1 {
-  @apply font-secondary text-sm leading-none tracking-tight;
+    @apply font-secondary text-sm leading-none tracking-tight;
 }

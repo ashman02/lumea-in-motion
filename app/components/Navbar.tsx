@@ -6,8 +6,9 @@ import Button from "./Button";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { CustomEase } from "gsap/CustomEase";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+gsap.registerPlugin(useGSAP, ScrollTrigger, CustomEase);
 
 const Navbar = () => {
     const path = usePathname();
@@ -20,18 +21,7 @@ const Navbar = () => {
     const isAnimating = useRef<boolean>(false);
 
     const { contextSafe } = useGSAP(() => {
-        gsap.from(headerRef.current, {
-            yPercent: -150,
-            opacity: 0,
-            duration: 0.5,
-            ease: "power3.out",
-        });
-        gsap.from(menuRef.current, {
-            yPercent: -150,
-            opacity: 0,
-            duration: 0.5,
-            ease: "power3.out",
-        });
+        // We have to apply matchmedia for people who perfers reduced motion. So we have to animate only opacity, color, background-color and border-color for them.
         // we are using matchmedia because for mobile and tablet we have to animate menu as well
         const mm = gsap.matchMedia();
         mm.add(
@@ -39,32 +29,66 @@ const Navbar = () => {
                 isDesktop: "(min-width: 1024px)",
                 isTablet: "(min-width: 768px) and (max-width: 1023px)",
                 isMobile: "(max-width: 767px)",
+                reduceMotion: "(prefers-reduced-motion: reduce)",
             },
             (context) => {
-                const { isDesktop } = context.conditions as {
+                const { isDesktop, reduceMotion } = context.conditions as {
                     isDesktop: boolean;
+                    reduceMotion: boolean;
                 };
+
+                // We are using auto alpha to prevent flash of unstyled content because we are setting visibility hidden in css and auto alpha will handle that for us.
+                gsap.from(headerRef.current, {
+                    autoAlpha: 0,
+                    yPercent: reduceMotion ? 0 : -150,
+                    filter: "blur(4px)",
+                    // we are using duration 0.5 because power3 ease is quite fast.
+                    duration: 0.5,
+                    ease: "power2.out",
+                });
+                gsap.from(menuRef.current, {
+                    autoAlpha: 0,
+                    yPercent: reduceMotion ? 0 : -150,
+                    filter: "blur(4px)",
+                    duration: 0.5,
+                    ease: "power2.out",
+                });
 
                 let lastScroll = 0;
                 const threshold = 10; // prevents micro scroll jitter
 
                 // we have defined tweens and play them according to our need
-                const showAnim = gsap
-                    .from(headerRef.current, {
-                        y: -88,
-                        paused: true,
-                        duration: 0.25,
-                        ease: "power2.out",
-                    })
-                    .progress(1);
-                const showAnimMenu = gsap
-                    .from(menuRef.current, {
-                        y: -88,
-                        paused: true,
-                        duration: 0.25,
-                        ease: "power2.out",
-                    })
-                    .progress(1);
+                const showAnim = reduceMotion
+                    ? gsap.to(headerRef.current, {
+                          opacity: 0,
+                          paused: true,
+                          duration: 0.4,
+                          ease: "power2.out",
+                      })
+                    : gsap
+                          .from(headerRef.current, {
+                              y: -88,
+                              paused: true,
+                              duration: 0.4,
+                              ease: "power2.out",
+                          })
+                          .progress(1);
+
+                const showAnimMenu = reduceMotion
+                    ? gsap.from(menuRef.current, {
+                          opacity: 0,
+                          paused: true,
+                          duration: 0.2,
+                          ease: "power2.out",
+                      })
+                    : gsap
+                          .from(menuRef.current, {
+                              y: -88,
+                              paused: true,
+                              duration: 0.2,
+                              ease: "power2.out",
+                          })
+                          .progress(1);
 
                 ScrollTrigger.create({
                     start: "top top",
@@ -90,15 +114,31 @@ const Navbar = () => {
 
                         if (diff > 0) {
                             // scrolling down
-                            showAnim.timeScale(1.8).reverse();
+                            if (reduceMotion) {
+                                showAnim.timeScale(1.8);
+                            } else {
+                                showAnim.timeScale(1.8).reverse();
+                            }
                             if (!isDesktop) {
-                                showAnimMenu.timeScale(1.8).reverse();
+                                if (reduceMotion) {
+                                    showAnimMenu.timeScale(1.8);
+                                } else {
+                                    showAnimMenu.timeScale(1.8).reverse();
+                                }
                             }
                         } else {
                             // scrolling up
-                            showAnim.timeScale(1).play();
+                            if (reduceMotion) {
+                                showAnim.timeScale(1).reverse();
+                            } else {
+                                showAnim.timeScale(1).play();
+                            }
                             if (!isDesktop) {
-                                showAnimMenu.timeScale(1).play();
+                                if (reduceMotion) {
+                                    showAnimMenu.timeScale(1).reverse();
+                                } else {
+                                    showAnimMenu.timeScale(1).play();
+                                }
                             }
                         }
 
@@ -156,65 +196,157 @@ const Navbar = () => {
         if (isAnimating.current) return;
         if (menuTlRef.current) menuTlRef.current.kill();
         isAnimating.current = true;
-
         const startClip = getHeaderClip();
-        menuTlRef.current = gsap.timeline({
-            onComplete: () => {
-                isMenuOpen.current = true;
-                isAnimating.current = false;
-            },
-        });
-        // we are using fromTo because simple to was not working animation was like opening a book
-        menuTlRef.current
-            .fromTo(
-                menuRef.current,
-                { clipPath: startClip },
-                {
-                    clipPath: "inset(0px 0px 0px 0px round 0px)",
-                    ease: "sine.inOut",
-                    duration: 0.3,
+
+        const mm = gsap.matchMedia();
+
+        mm.add("(prefers-reduced-motion: no-preference)", () => {
+            menuTlRef.current = gsap.timeline({
+                onComplete: () => {
+                    isMenuOpen.current = true;
+                    isAnimating.current = false;
                 },
-            )
-            // We are turning our ham into X sign. Y value is tried and error value nothing calculated
-            .to(
-                ".bar.top",
-                {
-                    rotate: 45,
-                    y: 9,
-                    transformOrigin: "center center",
-                    ease: "sine.inOut",
-                    duration: 0.3,
-                },
-                "<",
-            )
-            .to(
-                ".bar.middle",
-                { scaleX: 0, opacity: 0, ease: "sine.inOut", duration: 0.3 },
-                "<",
-            )
-            .to(
-                ".bar.bottom",
-                {
-                    rotate: -45,
-                    y: -7.25,
-                    transformOrigin: "center center",
-                    ease: "sine.inOut",
-                    duration: 0.3,
-                },
-                "<",
-            )
-            .to(".nav-smaller-screen-items", {
-                opacity: 1,
-                y: 0,
-                ease: "power3.out",
-                duration: 0.2,
-                stagger: 0.03,
-            })
-            .to(".nav-smaller-screen-socials", {
-                opacity: 1,
-                ease: "power3.out",
-                duration: 0.2,
             });
+            // we are using fromTo because simple to was not working animation was like opening a book
+            menuTlRef.current
+                .fromTo(
+                    menuRef.current,
+                    { clipPath: startClip },
+                    {
+                        clipPath: "inset(0px 0px 0px 0px round 0px)",
+                        ease: "power3.inOut",
+                        duration: 0.3,
+                    },
+                )
+                // We are turning our ham into X sign. Y value is tried and error value nothing calculated
+                .to(
+                    ".bar.top",
+                    {
+                        rotate: 45,
+                        y: 9,
+                        transformOrigin: "center center",
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.middle",
+                    {
+                        scaleX: 0,
+                        opacity: 0,
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.bottom",
+                    {
+                        rotate: -45,
+                        y: -7.25,
+                        transformOrigin: "center center",
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".nav-smaller-screen-items",
+                    {
+                        opacity: 1,
+                        y: 0,
+                        ease: "power3.out",
+                        duration: 0.2,
+                        stagger: 0.03,
+                    },
+                    "<0.1",
+                )
+                .to(
+                    ".nav-smaller-screen-socials",
+                    {
+                        opacity: 1,
+                        ease: "power3.out",
+                        duration: 0.2,
+                    },
+                    "<0.1",
+                );
+        });
+        mm.add("(prefers-reduced-motion: reduce)", () => {
+            menuTlRef.current = gsap.timeline({
+                onComplete: () => {
+                    isMenuOpen.current = true;
+                    isAnimating.current = false;
+                },
+            });
+            // we are using fromTo because simple to was not working animation was like opening a book
+            menuTlRef.current
+                .fromTo(
+                    menuRef.current,
+                    {
+                        clipPath: "inset(0px 0px 0px 0px round 0px)",
+                        opacity: 0,
+                    },
+                    {
+                        opacity: 1,
+                        ease: "power3.inOut",
+                        duration: 0.3,
+                    },
+                )
+                // We are turning our ham into X sign. Y value is tried and error value nothing calculated
+                .to(
+                    ".bar.top",
+                    {
+                        rotate: 45,
+                        y: 9,
+                        transformOrigin: "center center",
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.middle",
+                    {
+                        scaleX: 0,
+                        opacity: 0,
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.bottom",
+                    {
+                        rotate: -45,
+                        y: -7.25,
+                        transformOrigin: "center center",
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".nav-smaller-screen-items",
+                    {
+                        opacity: 1,
+                        y: 0,
+                        ease: "power3.out",
+                        duration: 0.2,
+                        stagger: 0.03,
+                    },
+                    "<0.1",
+                )
+                .to(
+                    ".nav-smaller-screen-socials",
+                    {
+                        opacity: 1,
+                        ease: "power3.out",
+                        duration: 0.2,
+                    },
+                    "<0.1",
+                );
+        });
     });
     // eslint-disable-next-line react-hooks/refs
     const handleMenuClose = contextSafe(() => {
@@ -222,67 +354,140 @@ const Navbar = () => {
         if (menuTlRef.current) menuTlRef.current.kill();
         const endClip = getHeaderClip();
         isAnimating.current = true;
-        menuTlRef.current = gsap.timeline({
-            onComplete: () => {
-                isMenuOpen.current = false;
-                isAnimating.current = false;
-            },
-        });
-        menuTlRef.current
 
-            .to(".nav-smaller-screen-items", {
-                opacity: 0,
-                y: 48,
-                ease: "power3.out",
-                duration: 0.2,
-            })
-            .to(
-                ".nav-smaller-screen-socials",
-                {
+        const mm = gsap.matchMedia();
+
+        mm.add("(prefers-reduced-motion: no-preference)", () => {
+            menuTlRef.current = gsap.timeline({
+                onComplete: () => {
+                    isMenuOpen.current = false;
+                    isAnimating.current = false;
+                },
+            });
+            menuTlRef.current
+
+                .to(".nav-smaller-screen-items", {
                     opacity: 0,
+                    y: 48,
                     ease: "power3.out",
                     duration: 0.2,
+                })
+                .to(
+                    ".nav-smaller-screen-socials",
+                    {
+                        opacity: 0,
+                        ease: "power3.out",
+                        duration: 0.2,
+                    },
+                    "<",
+                )
+                .fromTo(
+                    menuRef.current,
+                    { clipPath: "inset(0px 0px 0px 0px round 0px)" },
+                    { clipPath: endClip, ease: "power3.inOut", duration: 0.2 },
+                    "<",
+                )
+                .to(
+                    ".bar.top",
+                    {
+                        rotate: 0,
+                        y: 0,
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.middle",
+                    {
+                        scaleX: 1,
+                        opacity: 1,
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.bottom",
+                    {
+                        rotate: 0,
+                        y: 0,
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                );
+        });
+
+        mm.add("(prefers-reduced-motion: reduce)", () => {
+            menuTlRef.current = gsap.timeline({
+                onComplete: () => {
+                    isMenuOpen.current = false;
+                    isAnimating.current = false;
+                    gsap.set(menuRef.current, { clipPath: endClip });
                 },
-                "<",
-            )
-            .fromTo(
-                menuRef.current,
-                { clipPath: "inset(0px 0px 0px 0px round 0px)" },
-                { clipPath: endClip, ease: "sine.inOut", duration: 0.2 },
-                "<",
-            )
-            .to(
-                ".bar.top",
-                {
-                    rotate: 0,
+            });
+            menuTlRef.current
+
+                .to(".nav-smaller-screen-items", {
+                    opacity: 0,
                     y: 0,
-                    ease: "sine.inOut",
-                    duration: 0.3,
-                },
-                "<",
-            )
-            .to(
-                ".bar.middle",
-                { scaleX: 1, opacity: 1, ease: "sine.inOut", duration: 0.3 },
-                "<",
-            )
-            .to(
-                ".bar.bottom",
-                {
-                    rotate: 0,
-                    y: 0,
-                    ease: "sine.inOut",
-                    duration: 0.3,
-                },
-                "<",
-            );
+                    ease: "power3.out",
+                    duration: 0.2,
+                })
+                .to(
+                    ".nav-smaller-screen-socials",
+                    {
+                        opacity: 0,
+                        ease: "power3.out",
+                        duration: 0.2,
+                    },
+                    "<",
+                )
+                .fromTo(
+                    menuRef.current,
+                    { opacity: 1 },
+                    { opacity: 0, ease: "power3.inOut", duration: 0.2 },
+                    "<",
+                )
+                .to(
+                    ".bar.top",
+                    {
+                        rotate: 0,
+                        y: 0,
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.middle",
+                    {
+                        scaleX: 1,
+                        opacity: 1,
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.bottom",
+                    {
+                        rotate: 0,
+                        y: 0,
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                );
+        });
     });
 
     return (
         <>
             <header
                 ref={headerRef}
-                className="fixed top-3 left-[calc(50%-160px)] z-20 flex w-[320px] items-center justify-between rounded-2 bg-bg-base px-4 py-3 shadow-md md:top-4 md:left-[calc(50%-240px)] md:w-120 md:rounded-3 md:px-6 md:py-4 lg:left-[calc(50%-384px)] lg:w-3xl"
+                className="invisible fixed top-3 left-[calc(50%-160px)] z-20 flex w-[320px] items-center justify-between rounded-2 bg-bg-base px-4 py-3 shadow-md will-change-transform md:top-4 md:left-[calc(50%-240px)] md:w-120 md:rounded-3 md:px-6 md:py-4 lg:left-[calc(50%-384px)] lg:w-3xl"
             >
                 <div className="logo">
                     <h1 className="heading-3 text-base">LUMEA</h1>
@@ -292,7 +497,7 @@ const Navbar = () => {
                         {navItems.map((item) => (
                             <li
                                 key={item.name}
-                                className="paragraph-2 text-base"
+                                className={`paragraph-2 ${item.isActive ? "text-text-base" : "text-text-subtle"} transition-colors duration-150 ease-initial hover:text-text-base`}
                             >
                                 <Link href={item.link}>{item.name}</Link>
                             </li>
@@ -343,13 +548,13 @@ const Navbar = () => {
             {/* Menu bar for tablet and mobile */}
             <nav
                 ref={menuRef}
-                className="fixed top-0 right-0 bottom-0 left-0 z-10 flex w-full flex-col items-center justify-end gap-16 bg-bg-subtle px-6 pb-10 will-change-[clip-path] [clip-path:inset(12px_calc(50%-160px)_calc(100vh-76px)_round_12px)] md:[clip-path:inset(16px_calc(50%-240px)_calc(100vh-88px)_round_12px)] lg:hidden lg:[clip-path:inset(16px_calc(50%-384px)_calc(100vh-88px)_round_12px)]"
+                className="invisible fixed top-0 right-0 bottom-0 left-0 z-10 flex w-full flex-col items-center justify-end gap-16 bg-bg-subtle px-6 pb-10 will-change-auto [clip-path:inset(12px_calc(50%-160px)_calc(100vh-76px)_round_12px)] md:[clip-path:inset(16px_calc(50%-240px)_calc(100vh-88px)_round_12px)] lg:hidden lg:[clip-path:inset(16px_calc(50%-384px)_calc(100vh-88px)_round_12px)]"
             >
                 <ul className="menu-items flex w-full max-w-100 flex-col gap-12 md:max-w-150">
                     {navItems.map((item, idx) => (
                         <li
                             key={item.name}
-                            className="nav-smaller-screen-items min-w-full translate-y-12 opacity-0"
+                            className="nav-smaller-screen-items min-w-full opacity-0 will-change-transform motion-safe:translate-y-12 motion-reduce:translate-y-0"
                             style={{
                                 textAlign: idx === 1 ? "end" : "start",
                                 paddingTop: idx === 2 ? "16px" : "0px",
@@ -357,7 +562,7 @@ const Navbar = () => {
                         >
                             <Link
                                 href={item.link}
-                                className="heading-1 text-base"
+                                className={`heading-1 ${item.isActive ? "text-text-base" : "text-text-subtle"}`}
                             >
                                 {item.name}
                             </Link>

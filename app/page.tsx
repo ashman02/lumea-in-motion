@@ -39,6 +39,8 @@ export default function Home() {
 
     useGSAP(() => {
         // Hero Section Animations
+        gsap.set(heroHeadingRef.current, {autoAlpha: 1});
+
         SplitText.create(heroHeadingRef.current, {
             type: "lines",
             autoSplit: true,
@@ -147,7 +149,7 @@ export default function Home() {
                         <div className="headings overflow-hidden">
                             <h1
                                 ref={heroHeadingRef}
-                                className="heading-1 max-w-100 text-center text-text-on-color md:max-w-129 lg:max-w-165"
+                                className="heading-1 max-w-100 text-center text-text-on-color md:max-w-129 lg:max-w-165 invisible"
                             >
                                 {homeData.hero.heading}
                             </h1>
@@ -275,7 +277,7 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-            <TestimonialSection/>
+            <TestimonialSection />
         </main>
     );
 }
