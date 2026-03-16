@@ -26,14 +26,10 @@ const Navbar = () => {
         const mm = gsap.matchMedia();
         mm.add(
             {
-                isDesktop: "(min-width: 1024px)",
-                isTablet: "(min-width: 768px) and (max-width: 1023px)",
-                isMobile: "(max-width: 767px)",
                 reduceMotion: "(prefers-reduced-motion: reduce)",
             },
             (context) => {
-                const { isDesktop, reduceMotion } = context.conditions as {
-                    isDesktop: boolean;
+                const { reduceMotion } = context.conditions as {
                     reduceMotion: boolean;
                 };
 
@@ -43,13 +39,6 @@ const Navbar = () => {
                     yPercent: reduceMotion ? 0 : -150,
                     filter: "blur(4px)",
                     // we are using duration 0.5 because power3 ease is quite fast.
-                    duration: 0.5,
-                    ease: "power2.out",
-                });
-                gsap.from(menuRef.current, {
-                    autoAlpha: 0,
-                    yPercent: reduceMotion ? 0 : -150,
-                    filter: "blur(4px)",
                     duration: 0.5,
                     ease: "power2.out",
                 });
@@ -74,22 +63,6 @@ const Navbar = () => {
                           })
                           .progress(1);
 
-                const showAnimMenu = reduceMotion
-                    ? gsap.from(menuRef.current, {
-                          opacity: 0,
-                          paused: true,
-                          duration: 0.2,
-                          ease: "power2.out",
-                      })
-                    : gsap
-                          .from(menuRef.current, {
-                              y: -88,
-                              paused: true,
-                              duration: 0.2,
-                              ease: "power2.out",
-                          })
-                          .progress(1);
-
                 ScrollTrigger.create({
                     start: "top top",
                     end: 99999,
@@ -102,9 +75,6 @@ const Navbar = () => {
                         // always show navbar near top
                         if (scroll < 80) {
                             showAnim.play();
-                            if (!isDesktop) {
-                                showAnimMenu.play();
-                            }
                             lastScroll = scroll;
                             return;
                         }
@@ -119,26 +89,12 @@ const Navbar = () => {
                             } else {
                                 showAnim.timeScale(1.8).reverse();
                             }
-                            if (!isDesktop) {
-                                if (reduceMotion) {
-                                    showAnimMenu.timeScale(1.8);
-                                } else {
-                                    showAnimMenu.timeScale(1.8).reverse();
-                                }
-                            }
                         } else {
                             // scrolling up
                             if (reduceMotion) {
                                 showAnim.timeScale(1).reverse();
                             } else {
                                 showAnim.timeScale(1).play();
-                            }
-                            if (!isDesktop) {
-                                if (reduceMotion) {
-                                    showAnimMenu.timeScale(1).reverse();
-                                } else {
-                                    showAnimMenu.timeScale(1).play();
-                                }
                             }
                         }
 
@@ -199,6 +155,8 @@ const Navbar = () => {
         const startClip = getHeaderClip();
 
         const mm = gsap.matchMedia();
+
+        gsap.set(menuRef.current, { display: "flex" });
 
         mm.add("(prefers-reduced-motion: no-preference)", () => {
             menuTlRef.current = gsap.timeline({
@@ -362,6 +320,7 @@ const Navbar = () => {
                 onComplete: () => {
                     isMenuOpen.current = false;
                     isAnimating.current = false;
+                    gsap.set(menuRef.current, { display: "none" });
                 },
             });
             menuTlRef.current
@@ -424,7 +383,10 @@ const Navbar = () => {
                 onComplete: () => {
                     isMenuOpen.current = false;
                     isAnimating.current = false;
-                    gsap.set(menuRef.current, { clipPath: endClip });
+                    gsap.set(menuRef.current, {
+                        clipPath: endClip,
+                        display: "none",
+                    });
                 },
             });
             menuTlRef.current
@@ -548,7 +510,7 @@ const Navbar = () => {
             {/* Menu bar for tablet and mobile */}
             <nav
                 ref={menuRef}
-                className="invisible fixed top-0 right-0 bottom-0 left-0 z-10 flex w-full flex-col items-center justify-end gap-16 bg-bg-subtle px-6 pb-10 will-change-auto [clip-path:inset(12px_calc(50%-160px)_calc(100vh-76px)_round_12px)] md:[clip-path:inset(16px_calc(50%-240px)_calc(100vh-88px)_round_12px)] lg:hidden lg:[clip-path:inset(16px_calc(50%-384px)_calc(100vh-88px)_round_12px)]"
+                className="fixed top-0 right-0 bottom-0 left-0 z-10 hidden w-full flex-col items-center justify-end gap-16 bg-bg-subtle px-6 pb-10 will-change-auto [clip-path:inset(12px_calc(50%-160px)_calc(100vh-76px)_round_12px)] md:[clip-path:inset(16px_calc(50%-240px)_calc(100vh-88px)_round_12px)] lg:[clip-path:inset(16px_calc(50%-384px)_calc(100vh-88px)_round_12px)]"
             >
                 <ul className="menu-items flex w-full max-w-100 flex-col gap-12 md:max-w-150">
                     {navItems.map((item, idx) => (
