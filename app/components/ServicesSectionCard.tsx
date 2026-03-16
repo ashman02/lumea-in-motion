@@ -2,7 +2,6 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import Image, { StaticImageData } from "next/image";
 import React, { useRef } from "react";
-import usePrefersReducedMotion from "../utils/usePreferReduceMotion";
 
 gsap.registerPlugin(useGSAP);
 
@@ -16,12 +15,10 @@ interface Props {
 }
 
 const ServicesSectionCard = ({ treatment }: Props) => {
-    const tl = useRef<GSAPTimeline>(null);
+    const tl = useRef<gsap.core.Timeline>(null);
     const serviceCardOverlayRef = useRef<HTMLDivElement>(null);
     const serviceCardTextPartRef = useRef<HTMLDivElement>(null);
     const serviceCardImageRef = useRef<HTMLImageElement>(null);
-
-    const reduceMotion = usePrefersReducedMotion();
 
     const { contextSafe } = useGSAP(() => {
         if (!serviceCardTextPartRef.current) return;
@@ -46,6 +43,33 @@ const ServicesSectionCard = ({ treatment }: Props) => {
                     gsap.set(serviceCardTextPartRef.current, {
                         y: height - 33,
                     });
+
+                    // Create the timeline to use in handlers and pause it initially
+                    tl.current = gsap
+                        .timeline({
+                            paused: true,
+                            defaults: {
+                                duration: 0.3,
+                                ease: "power2.inOut",
+                            },
+                        })
+                        .to(serviceCardOverlayRef.current, {
+                            opacity: 0.4,
+                        })
+                        .to(
+                            serviceCardImageRef.current,
+                            {
+                                scale: 1,
+                            },
+                            "<",
+                        )
+                        .to(
+                            serviceCardTextPartRef.current,
+                            {
+                                y: 0,
+                            },
+                            "<",
+                        );
                 }
             },
         );
@@ -55,70 +79,11 @@ const ServicesSectionCard = ({ treatment }: Props) => {
 
     // eslint-disable-next-line react-hooks/refs
     const handleMouseEnterCard = contextSafe(() => {
-        // using matchmedia so hover effect wont trigger on smaller screens
-        if (window.innerWidth < 1024 || reduceMotion) return;
-
-        if (tl.current) {
-            tl.current.kill();
-        }
-        tl.current = gsap.timeline({
-            defaults: {
-                duration: 0.3,
-                ease: "power2.out",
-            },
-        });
-        tl.current
-            .to(serviceCardOverlayRef.current, {
-                opacity: 0.4,
-            })
-            .to(
-                serviceCardImageRef.current,
-                {
-                    scale: 1,
-                },
-                "<",
-            )
-            .to(
-                serviceCardTextPartRef.current,
-                {
-                    y: 0,
-                },
-                "<",
-            );
+        tl.current?.play();
     });
     // eslint-disable-next-line react-hooks/refs
     const handleMouseLeaveCard = contextSafe(() => {
-        if (window.innerWidth < 1024 || reduceMotion) return;
-
-        if (!serviceCardTextPartRef.current) return;
-
-        if (tl.current) {
-            tl.current.kill();
-        }
-        tl.current = gsap.timeline({
-            defaults: {
-                duration: 0.2,
-                ease: "power2.out",
-            },
-        });
-        tl.current
-            .to(serviceCardOverlayRef.current, {
-                opacity: 0.2,
-            })
-            .to(
-                serviceCardImageRef.current,
-                {
-                    scale: 1.1,
-                },
-                "<",
-            )
-            .to(
-                serviceCardTextPartRef.current,
-                {
-                    y: serviceCardTextPartRef.current.clientHeight - 33,
-                },
-                "<",
-            );
+        tl.current?.timeScale(1.5).reverse();
     });
 
     return (
