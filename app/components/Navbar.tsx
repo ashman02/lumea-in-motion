@@ -18,7 +18,43 @@ const Navbar = () => {
     const menuTlRef = useRef<gsap.core.Timeline>(null);
     const menuRef = useRef<HTMLElement>(null);
     const headerRef = useRef<HTMLElement>(null);
+    const barsRef = useRef({
+        top: null as SVGRectElement | null,
+        middle: null as SVGRectElement | null,
+        bottom: null as SVGRectElement | null,
+    });
+    const navItemsRef = useRef<HTMLLIElement[]>([]);
+    const socialsRef = useRef<HTMLUListElement>(null);
+
     const isAnimating = useRef<boolean>(false);
+
+    const navItems = [
+        {
+            name: "Home",
+            link: "/",
+            isActive: path === "/",
+        },
+        {
+            name: "About",
+            link: "/about",
+            isActive: path === "/about",
+        },
+        {
+            name: "Services",
+            link: "/services",
+            isActive: path === "/services",
+        },
+    ];
+    const socialMediaAccounts = [
+        {
+            title: "Facebook",
+            link: "https://www.facebook.com/",
+        },
+        {
+            title: "Instagram",
+            link: "https://www.instagram.com/",
+        },
+    ];
 
     // We created this function because we have one state and one ref for menu open state
     const updateMenuState = (value: boolean) => {
@@ -128,12 +164,11 @@ const Navbar = () => {
                         clipPath: "inset(0px 0px 0px 0px round 0px)",
                         ease: "power3.inOut",
                         duration: 0.3,
-                        immediateRender: false, // ✅ Don't render until play() is called
                     },
                 )
                 // We are turning our ham into X sign. Y value is tried and error value nothing calculated
                 .to(
-                    ".bar.top",
+                    barsRef.current.top,
                     {
                         rotate: 45,
                         y: 9,
@@ -144,7 +179,7 @@ const Navbar = () => {
                     "<",
                 )
                 .to(
-                    ".bar.middle",
+                    barsRef.current.middle,
                     {
                         scaleX: 0,
                         opacity: 0,
@@ -154,7 +189,7 @@ const Navbar = () => {
                     "<",
                 )
                 .to(
-                    ".bar.bottom",
+                    barsRef.current.bottom,
                     {
                         rotate: -45,
                         y: -7.25,
@@ -165,7 +200,7 @@ const Navbar = () => {
                     "<",
                 )
                 .to(
-                    ".nav-smaller-screen-items",
+                    navItemsRef.current,
                     {
                         opacity: 1,
                         y: 0,
@@ -176,7 +211,7 @@ const Navbar = () => {
                     "<0.1",
                 )
                 .to(
-                    ".nav-smaller-screen-socials",
+                    socialsRef.current,
                     {
                         opacity: 1,
                         ease: "power3.out",
@@ -276,7 +311,7 @@ const Navbar = () => {
                 )
                 // We are turning our ham into X sign. Y value is tried and error value nothing calculated
                 .to(
-                    ".bar.top",
+                    barsRef.current.top,
                     {
                         rotate: 45,
                         y: 9,
@@ -287,7 +322,7 @@ const Navbar = () => {
                     "<",
                 )
                 .to(
-                    ".bar.middle",
+                    barsRef.current.middle,
                     {
                         scaleX: 0,
                         opacity: 0,
@@ -297,7 +332,7 @@ const Navbar = () => {
                     "<",
                 )
                 .to(
-                    ".bar.bottom",
+                    barsRef.current.bottom,
                     {
                         rotate: -45,
                         y: -7.25,
@@ -308,7 +343,7 @@ const Navbar = () => {
                     "<",
                 )
                 .to(
-                    ".nav-smaller-screen-items",
+                    navItemsRef.current,
                     {
                         opacity: 1,
                         y: 0,
@@ -319,7 +354,7 @@ const Navbar = () => {
                     "<0.1",
                 )
                 .to(
-                    ".nav-smaller-screen-socials",
+                    socialsRef.current,
                     {
                         opacity: 1,
                         ease: "power3.out",
@@ -329,34 +364,6 @@ const Navbar = () => {
                 );
         });
     }, []);
-
-    const navItems = [
-        {
-            name: "Home",
-            link: "/",
-            isActive: path === "/",
-        },
-        {
-            name: "About",
-            link: "/about",
-            isActive: path === "/about",
-        },
-        {
-            name: "Services",
-            link: "/services",
-            isActive: path === "/services",
-        },
-    ];
-    const socialMediaAccounts = [
-        {
-            title: "Facebook",
-            link: "https://www.facebook.com/",
-        },
-        {
-            title: "Instagram",
-            link: "https://www.instagram.com/",
-        },
-    ];
 
     // eslint-disable-next-line react-hooks/refs
     const handleMenuOpen = contextSafe(() => {
@@ -409,6 +416,9 @@ const Navbar = () => {
                     >
                         <svg width="32" height="32" viewBox="0 0 32 32">
                             <rect
+                                ref={(el) => {
+                                    barsRef.current.top = el;
+                                }}
                                 className="bar top fill-text-base"
                                 width="32"
                                 height="2"
@@ -417,6 +427,9 @@ const Navbar = () => {
                                 rx="2"
                             />
                             <rect
+                                ref={(el) => {
+                                    barsRef.current.middle = el;
+                                }}
                                 className="bar middle fill-text-base"
                                 width="32"
                                 height="2"
@@ -425,6 +438,9 @@ const Navbar = () => {
                                 rx="2"
                             />
                             <rect
+                                ref={(el) => {
+                                    barsRef.current.bottom = el;
+                                }}
                                 className="bar bottom fill-text-base"
                                 width="32"
                                 height="2"
@@ -445,6 +461,9 @@ const Navbar = () => {
                     {navItems.map((item, idx) => (
                         <li
                             key={item.name}
+                            ref={(el) => {
+                                if (el) navItemsRef.current[idx] = el;
+                            }}
                             className="nav-smaller-screen-items min-w-full opacity-0 will-change-transform motion-safe:translate-y-12 motion-reduce:translate-y-0"
                             style={{
                                 textAlign: idx === 1 ? "end" : "start",
@@ -460,7 +479,10 @@ const Navbar = () => {
                         </li>
                     ))}
                 </ul>
-                <ul className="nav-smaller-screen-socials flex gap-4 opacity-0">
+                <ul
+                    className="nav-smaller-screen-socials flex gap-4 opacity-0"
+                    ref={socialsRef}
+                >
                     {socialMediaAccounts.map((account) => (
                         <li key={account.title}>
                             <Link
