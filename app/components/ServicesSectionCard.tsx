@@ -90,7 +90,7 @@ const ServicesSectionCard = ({ treatment }: Props) => {
         <div
             onMouseEnter={handleMouseEnterCard}
             onMouseLeave={handleMouseLeaveCard}
-            className="relative h-135 w-full shrink-0 overflow-hidden rounded-4 md:max-w-125 md:rounded-5 lg:rounded-6 2xl:aspect-500/540 2xl:h-full 2xl:max-w-1/3"
+            className="motion-safe:2xl:max-w-1/3 relative h-135 w-full shrink-0 overflow-hidden rounded-4 md:rounded-5 motion-safe:md:max-w-125 lg:rounded-6 2xl:aspect-500/540 2xl:h-full"
         >
             <div className="img-container relative h-full w-full">
                 <Image

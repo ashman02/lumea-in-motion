@@ -99,8 +99,8 @@ export default function Home() {
             gsap.from(aboutImageRef.current, {
                 y: 100,
                 opacity: 0,
-                duration: 0.6,
-                ease: "power1.out",
+                duration: 0.5,
+                ease: "power3.out",
                 scrollTrigger: {
                     trigger: aboutImageRef.current,
                     start: "top 80%",
@@ -109,8 +109,8 @@ export default function Home() {
             gsap.from(aboutButtonRef.current, {
                 y: 48,
                 opacity: 0,
-                duration: 0.6,
-                ease: "power1.out",
+                duration: 0.4,
+                ease: "power3.out",
                 scrollTrigger: {
                     trigger: aboutButtonRef.current,
                     start: "top 90%",
@@ -167,11 +167,6 @@ export default function Home() {
                 true,
             );
 
-            pinnedHorizontalScrollAnimation(
-                servicesContainerRef,
-                servicesWrapperRef,
-            );
-
             // About Section Animations
             headingAnimationFunction(
                 aboutHeadingRef.current,
@@ -184,20 +179,18 @@ export default function Home() {
                 true,
             );
             gsap.from(aboutImageRef.current, {
-                y: 100,
                 opacity: 0,
-                duration: 0.6,
-                ease: "power1.out",
+                duration: 0.5,
+                ease: "power3.out",
                 scrollTrigger: {
                     trigger: aboutImageRef.current,
                     start: "top 80%",
                 },
             });
             gsap.from(aboutButtonRef.current, {
-                y: 48,
                 opacity: 0,
-                duration: 0.6,
-                ease: "power1.out",
+                duration: 0.4,
+                ease: "power3.out",
                 scrollTrigger: {
                     trigger: aboutButtonRef.current,
                     start: "top 90%",
@@ -221,6 +214,8 @@ export default function Home() {
                 resultWrapperRef,
             );
         });
+
+        return () => mm.revert();
     }, []);
 
     return (
@@ -277,10 +272,10 @@ export default function Home() {
                             {homeData.services.heading}
                         </h2>
                     </div>
-                    <div>
+                    <div className="w-full">
                         <div
                             ref={servicesContainerRef}
-                            className="flex gap-4 md:gap-5 lg:gap-6"
+                            className="flex grid-cols-1 gap-4 motion-reduce:grid md:grid-cols-2 md:gap-5 lg:gap-6 2xl:grid-cols-3"
                         >
                             {homeData.services.treatments.map((t) => (
                                 <ServicesSectionCard key={t.id} treatment={t} />
