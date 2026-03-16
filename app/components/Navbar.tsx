@@ -1,109 +1,30 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Button from "./Button";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { CustomEase } from "gsap/CustomEase";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger, CustomEase);
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const Navbar = () => {
     const path = usePathname();
 
     // is menu bar open or not
-    const isMenuOpen = useRef<boolean>(false);
-    const menuTlRef = useRef<GSAPTimeline>(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const isMenuOpenRef = useRef(false); //to prevent scroll hide while menu is open
+    const menuTlRef = useRef<gsap.core.Timeline>(null);
     const menuRef = useRef<HTMLElement>(null);
     const headerRef = useRef<HTMLElement>(null);
     const isAnimating = useRef<boolean>(false);
 
-    const { contextSafe } = useGSAP(() => {
-        // We have to apply matchmedia for people who perfers reduced motion. So we have to animate only opacity, color, background-color and border-color for them.
-        // we are using matchmedia because for mobile and tablet we have to animate menu as well
-        const mm = gsap.matchMedia();
-        mm.add(
-            {
-                reduceMotion: "(prefers-reduced-motion: reduce)",
-            },
-            (context) => {
-                const { reduceMotion } = context.conditions as {
-                    reduceMotion: boolean;
-                };
-
-                // We are using auto alpha to prevent flash of unstyled content because we are setting visibility hidden in css and auto alpha will handle that for us.
-                gsap.from(headerRef.current, {
-                    autoAlpha: 0,
-                    yPercent: reduceMotion ? 0 : -150,
-                    filter: "blur(4px)",
-                    // we are using duration 0.5 because power3 ease is quite fast.
-                    duration: 0.5,
-                    ease: "power2.out",
-                });
-
-                let lastScroll = 0;
-                const threshold = 10; // prevents micro scroll jitter
-
-                // we have defined tweens and play them according to our need
-                const showAnim = reduceMotion
-                    ? gsap.to(headerRef.current, {
-                          opacity: 0,
-                          paused: true,
-                          duration: 0.4,
-                          ease: "power2.out",
-                      })
-                    : gsap
-                          .from(headerRef.current, {
-                              y: -88,
-                              paused: true,
-                              duration: 0.4,
-                              ease: "power2.out",
-                          })
-                          .progress(1);
-
-                ScrollTrigger.create({
-                    start: "top top",
-                    end: 99999,
-                    onUpdate: (self) => {
-                        if (isMenuOpen.current) return;
-
-                        const scroll = self.scroll();
-                        const diff = scroll - lastScroll;
-
-                        // always show navbar near top
-                        if (scroll < 80) {
-                            showAnim.play();
-                            lastScroll = scroll;
-                            return;
-                        }
-
-                        // ignore micro movements
-                        if (Math.abs(diff) < threshold) return;
-
-                        if (diff > 0) {
-                            // scrolling down
-                            if (reduceMotion) {
-                                showAnim.timeScale(1.8);
-                            } else {
-                                showAnim.timeScale(1.8).reverse();
-                            }
-                        } else {
-                            // scrolling up
-                            if (reduceMotion) {
-                                showAnim.timeScale(1).reverse();
-                            } else {
-                                showAnim.timeScale(1).play();
-                            }
-                        }
-
-                        lastScroll = scroll;
-                    },
-                });
-            },
-        );
-    }, []);
+    // We created this function because we have one state and one ref for menu open state
+    const updateMenuState = (value: boolean) => {
+        isMenuOpenRef.current = value;
+        setIsMenuOpen(value);
+    };
 
     // Instead of guessing get the original values of header left right top bottom
     const getHeaderClip = () => {
@@ -117,6 +38,297 @@ const Navbar = () => {
         // we should be using round 8px for mobile. (we will fix this later even in css)
         return `inset(${top}px ${right}px ${bottom}px ${left}px round 12px)`;
     };
+
+    const { contextSafe } = useGSAP(() => {
+        const mm = gsap.matchMedia();
+        mm.add("(prefers-reduced-motion: no-preference)", () => {
+            // We are using auto alpha to prevent flash of unstyled content because we are setting visibility hidden in css and auto alpha will handle that for us.
+            gsap.from(headerRef.current, {
+                autoAlpha: 0,
+                yPercent: -150,
+                filter: "blur(4px)",
+                // we are using duration 0.5 because power3 ease is quite fast.
+                duration: 0.5,
+                ease: "power2.out",
+            });
+
+            let lastScroll = 0;
+            const threshold = 10; // prevents micro scroll jitter
+
+            // we have defined tweens and play them according to our need
+            const showAnim = gsap
+                .from(headerRef.current, {
+                    y: -88,
+                    paused: true,
+                    duration: 0.4,
+                    ease: "power2.out",
+                })
+                .progress(1);
+
+            ScrollTrigger.create({
+                start: "top top",
+                end: 99999,
+                onUpdate: (self) => {
+                    if (isMenuOpenRef.current) return;
+
+                    const scroll = self.scroll();
+                    const diff = scroll - lastScroll;
+
+                    // always show navbar near top
+                    if (scroll < 80) {
+                        showAnim.play();
+                        lastScroll = scroll;
+                        return;
+                    }
+
+                    // ignore micro movements
+                    if (Math.abs(diff) < threshold) return;
+
+                    if (diff > 0) {
+                        // scrolling down
+                        showAnim.timeScale(1.8).reverse();
+                    } else {
+                        // scrolling up
+                        showAnim.timeScale(1).play();
+                    }
+
+                    lastScroll = scroll;
+                },
+            });
+
+            // We do not want to create timeline on every click so we are creating it inside useGSAP and storing it in ref and using it in our handlers
+            menuTlRef.current = gsap
+                .timeline({
+                    paused: true,
+                    onStart: () => {
+                        gsap.set(menuRef.current, {
+                            display: "flex",
+                        });
+                    },
+                    onComplete: () => {
+                        updateMenuState(true);
+                        isAnimating.current = false;
+                    },
+                    onReverseComplete: () => {
+                        updateMenuState(false);
+                        isAnimating.current = false;
+                        gsap.set(menuRef.current, {
+                            display: "none",
+                        });
+                    },
+                })
+
+                // we are using fromTo because simple to was not working animation was like opening a book
+                .fromTo(
+                    menuRef.current,
+                    {
+                        clipPath: () => getHeaderClip(), // ✅ Function returns fresh value
+                    },
+                    {
+                        clipPath: "inset(0px 0px 0px 0px round 0px)",
+                        ease: "power3.inOut",
+                        duration: 0.3,
+                        immediateRender: false, // ✅ Don't render until play() is called
+                    },
+                )
+                // We are turning our ham into X sign. Y value is tried and error value nothing calculated
+                .to(
+                    ".bar.top",
+                    {
+                        rotate: 45,
+                        y: 9,
+                        transformOrigin: "center center",
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.middle",
+                    {
+                        scaleX: 0,
+                        opacity: 0,
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.bottom",
+                    {
+                        rotate: -45,
+                        y: -7.25,
+                        transformOrigin: "center center",
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".nav-smaller-screen-items",
+                    {
+                        opacity: 1,
+                        y: 0,
+                        ease: "power3.out",
+                        duration: 0.2,
+                        stagger: 0.03,
+                    },
+                    "<0.1",
+                )
+                .to(
+                    ".nav-smaller-screen-socials",
+                    {
+                        opacity: 1,
+                        ease: "power3.out",
+                        duration: 0.2,
+                    },
+                    "<0.1",
+                );
+        });
+
+        // if user prefers reduced motion we are only animating opacity, colors and not animating y and blur because that can cause motion sickness for some people
+        mm.add("(prefers-reduced-motion: reduce)", () => {
+            gsap.from(headerRef.current, {
+                autoAlpha: 0,
+                // we are using duration 0.5 because power3 ease is quite fast.
+                duration: 0.5,
+                ease: "power2.out",
+            });
+
+            let lastScroll = 0;
+            const threshold = 10; // prevents micro scroll jitter
+
+            // we have defined tweens and play them according to our need
+            const showAnim = gsap
+                .to(headerRef.current, {
+                    opacity: 1,
+                    paused: true,
+                    duration: 0.4,
+                    ease: "power2.out",
+                })
+                .progress(1);
+
+            ScrollTrigger.create({
+                start: "top top",
+                end: 99999,
+                onUpdate: (self) => {
+                    if (isMenuOpenRef.current) return;
+
+                    const scroll = self.scroll();
+                    const diff = scroll - lastScroll;
+
+                    // always show navbar near top
+                    if (scroll < 80) {
+                        showAnim.play();
+                        lastScroll = scroll;
+                        return;
+                    }
+
+                    // ignore micro movements
+                    if (Math.abs(diff) < threshold) return;
+
+                    if (diff > 0) {
+                        // scrolling down
+                        showAnim.timeScale(1.8).reverse();
+                    } else {
+                        // scrolling up
+                        showAnim.timeScale(1).play();
+                    }
+
+                    lastScroll = scroll;
+                },
+            });
+
+            // Timeline logic
+            menuTlRef.current = gsap
+                .timeline({
+                    paused: true,
+                    onStart: () => {
+                        gsap.set(menuRef.current, {
+                            display: "flex",
+                        });
+                    },
+                    onComplete: () => {
+                        updateMenuState(true);
+                        isAnimating.current = false;
+                    },
+                    onReverseComplete: () => {
+                        updateMenuState(false);
+                        isAnimating.current = false;
+                        gsap.set(menuRef.current, {
+                            display: "none",
+                        });
+                    },
+                })
+                // we are using fromTo because simple to was not working animation was like opening a book
+                .fromTo(
+                    menuRef.current,
+                    {
+                        clipPath: "inset(0px 0px 0px 0px round 0px)",
+                        opacity: 0,
+                    },
+                    {
+                        clipPath: "inset(0px 0px 0px 0px round 0px)",
+                        opacity: 1,
+                        ease: "power3.inOut",
+                        duration: 0.3,
+                    },
+                )
+                // We are turning our ham into X sign. Y value is tried and error value nothing calculated
+                .to(
+                    ".bar.top",
+                    {
+                        rotate: 45,
+                        y: 9,
+                        transformOrigin: "center center",
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.middle",
+                    {
+                        scaleX: 0,
+                        opacity: 0,
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".bar.bottom",
+                    {
+                        rotate: -45,
+                        y: -7.25,
+                        transformOrigin: "center center",
+                        ease: "sine.inOut",
+                        duration: 0.3,
+                    },
+                    "<",
+                )
+                .to(
+                    ".nav-smaller-screen-items",
+                    {
+                        opacity: 1,
+                        y: 0,
+                        ease: "power3.out",
+                        duration: 0.2,
+                        stagger: 0.03,
+                    },
+                    "<0.1",
+                )
+                .to(
+                    ".nav-smaller-screen-socials",
+                    {
+                        opacity: 1,
+                        ease: "power3.out",
+                        duration: 0.2,
+                    },
+                    "<0.1",
+                );
+        });
+    }, []);
 
     const navItems = [
         {
@@ -150,299 +362,16 @@ const Navbar = () => {
     const handleMenuOpen = contextSafe(() => {
         // make sure we are not in animation already
         if (isAnimating.current) return;
-        if (menuTlRef.current) menuTlRef.current.kill();
         isAnimating.current = true;
-        const startClip = getHeaderClip();
-
-        const mm = gsap.matchMedia();
-
-        gsap.set(menuRef.current, { display: "flex" });
-
-        mm.add("(prefers-reduced-motion: no-preference)", () => {
-            menuTlRef.current = gsap.timeline({
-                onComplete: () => {
-                    isMenuOpen.current = true;
-                    isAnimating.current = false;
-                },
-            });
-            // we are using fromTo because simple to was not working animation was like opening a book
-            menuTlRef.current
-                .fromTo(
-                    menuRef.current,
-                    { clipPath: startClip },
-                    {
-                        clipPath: "inset(0px 0px 0px 0px round 0px)",
-                        ease: "power3.inOut",
-                        duration: 0.3,
-                    },
-                )
-                // We are turning our ham into X sign. Y value is tried and error value nothing calculated
-                .to(
-                    ".bar.top",
-                    {
-                        rotate: 45,
-                        y: 9,
-                        transformOrigin: "center center",
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                )
-                .to(
-                    ".bar.middle",
-                    {
-                        scaleX: 0,
-                        opacity: 0,
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                )
-                .to(
-                    ".bar.bottom",
-                    {
-                        rotate: -45,
-                        y: -7.25,
-                        transformOrigin: "center center",
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                )
-                .to(
-                    ".nav-smaller-screen-items",
-                    {
-                        opacity: 1,
-                        y: 0,
-                        ease: "power3.out",
-                        duration: 0.2,
-                        stagger: 0.03,
-                    },
-                    "<0.1",
-                )
-                .to(
-                    ".nav-smaller-screen-socials",
-                    {
-                        opacity: 1,
-                        ease: "power3.out",
-                        duration: 0.2,
-                    },
-                    "<0.1",
-                );
-        });
-        mm.add("(prefers-reduced-motion: reduce)", () => {
-            menuTlRef.current = gsap.timeline({
-                onComplete: () => {
-                    isMenuOpen.current = true;
-                    isAnimating.current = false;
-                },
-            });
-            // we are using fromTo because simple to was not working animation was like opening a book
-            menuTlRef.current
-                .fromTo(
-                    menuRef.current,
-                    {
-                        clipPath: "inset(0px 0px 0px 0px round 0px)",
-                        opacity: 0,
-                    },
-                    {
-                        opacity: 1,
-                        ease: "power3.inOut",
-                        duration: 0.3,
-                    },
-                )
-                // We are turning our ham into X sign. Y value is tried and error value nothing calculated
-                .to(
-                    ".bar.top",
-                    {
-                        rotate: 45,
-                        y: 9,
-                        transformOrigin: "center center",
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                )
-                .to(
-                    ".bar.middle",
-                    {
-                        scaleX: 0,
-                        opacity: 0,
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                )
-                .to(
-                    ".bar.bottom",
-                    {
-                        rotate: -45,
-                        y: -7.25,
-                        transformOrigin: "center center",
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                )
-                .to(
-                    ".nav-smaller-screen-items",
-                    {
-                        opacity: 1,
-                        y: 0,
-                        ease: "power3.out",
-                        duration: 0.2,
-                        stagger: 0.03,
-                    },
-                    "<0.1",
-                )
-                .to(
-                    ".nav-smaller-screen-socials",
-                    {
-                        opacity: 1,
-                        ease: "power3.out",
-                        duration: 0.2,
-                    },
-                    "<0.1",
-                );
-        });
+        // Just play the timeline we created in useGSAP
+        menuTlRef.current?.play();
     });
     // eslint-disable-next-line react-hooks/refs
     const handleMenuClose = contextSafe(() => {
         if (isAnimating.current) return;
-        if (menuTlRef.current) menuTlRef.current.kill();
-        const endClip = getHeaderClip();
         isAnimating.current = true;
-
-        const mm = gsap.matchMedia();
-
-        mm.add("(prefers-reduced-motion: no-preference)", () => {
-            menuTlRef.current = gsap.timeline({
-                onComplete: () => {
-                    isMenuOpen.current = false;
-                    isAnimating.current = false;
-                    gsap.set(menuRef.current, { display: "none" });
-                },
-            });
-            menuTlRef.current
-
-                .to(".nav-smaller-screen-items", {
-                    opacity: 0,
-                    y: 48,
-                    ease: "power3.out",
-                    duration: 0.2,
-                })
-                .to(
-                    ".nav-smaller-screen-socials",
-                    {
-                        opacity: 0,
-                        ease: "power3.out",
-                        duration: 0.2,
-                    },
-                    "<",
-                )
-                .fromTo(
-                    menuRef.current,
-                    { clipPath: "inset(0px 0px 0px 0px round 0px)" },
-                    { clipPath: endClip, ease: "power3.inOut", duration: 0.2 },
-                    "<",
-                )
-                .to(
-                    ".bar.top",
-                    {
-                        rotate: 0,
-                        y: 0,
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                )
-                .to(
-                    ".bar.middle",
-                    {
-                        scaleX: 1,
-                        opacity: 1,
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                )
-                .to(
-                    ".bar.bottom",
-                    {
-                        rotate: 0,
-                        y: 0,
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                );
-        });
-
-        mm.add("(prefers-reduced-motion: reduce)", () => {
-            menuTlRef.current = gsap.timeline({
-                onComplete: () => {
-                    isMenuOpen.current = false;
-                    isAnimating.current = false;
-                    gsap.set(menuRef.current, {
-                        clipPath: endClip,
-                        display: "none",
-                    });
-                },
-            });
-            menuTlRef.current
-
-                .to(".nav-smaller-screen-items", {
-                    opacity: 0,
-                    y: 0,
-                    ease: "power3.out",
-                    duration: 0.2,
-                })
-                .to(
-                    ".nav-smaller-screen-socials",
-                    {
-                        opacity: 0,
-                        ease: "power3.out",
-                        duration: 0.2,
-                    },
-                    "<",
-                )
-                .fromTo(
-                    menuRef.current,
-                    { opacity: 1 },
-                    { opacity: 0, ease: "power3.inOut", duration: 0.2 },
-                    "<",
-                )
-                .to(
-                    ".bar.top",
-                    {
-                        rotate: 0,
-                        y: 0,
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                )
-                .to(
-                    ".bar.middle",
-                    {
-                        scaleX: 1,
-                        opacity: 1,
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                )
-                .to(
-                    ".bar.bottom",
-                    {
-                        rotate: 0,
-                        y: 0,
-                        ease: "sine.inOut",
-                        duration: 0.3,
-                    },
-                    "<",
-                );
-        });
+        // Reverse the timeline
+        menuTlRef.current?.reverse();
     });
 
     return (
@@ -470,7 +399,7 @@ const Navbar = () => {
                     <Button title="Book Now" medium />
                     <div
                         onClick={() => {
-                            if (isMenuOpen.current) {
+                            if (isMenuOpen) {
                                 handleMenuClose();
                             } else {
                                 handleMenuOpen();
@@ -510,7 +439,7 @@ const Navbar = () => {
             {/* Menu bar for tablet and mobile */}
             <nav
                 ref={menuRef}
-                className="fixed top-0 right-0 bottom-0 left-0 z-10 hidden w-full flex-col items-center justify-end gap-16 bg-bg-subtle px-6 pb-10 will-change-auto [clip-path:inset(12px_calc(50%-160px)_calc(100vh-76px)_round_12px)] md:[clip-path:inset(16px_calc(50%-240px)_calc(100vh-88px)_round_12px)] lg:[clip-path:inset(16px_calc(50%-384px)_calc(100vh-88px)_round_12px)]"
+                className="fixed top-0 right-0 bottom-0 left-0 z-10 hidden w-full flex-col items-center justify-end gap-16 bg-bg-subtle px-6 pb-10 will-change-auto"
             >
                 <ul className="menu-items flex w-full max-w-100 flex-col gap-12 md:max-w-150">
                     {navItems.map((item, idx) => (
