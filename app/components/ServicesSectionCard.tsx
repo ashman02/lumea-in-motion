@@ -2,6 +2,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import Image, { StaticImageData } from "next/image";
 import React, { useRef } from "react";
+import usePrefersReducedMotion from "../utils/usePreferReduceMotion";
 
 gsap.registerPlugin(useGSAP);
 
@@ -20,19 +21,34 @@ const ServicesSectionCard = ({ treatment }: Props) => {
     const serviceCardTextPartRef = useRef<HTMLDivElement>(null);
     const serviceCardImageRef = useRef<HTMLImageElement>(null);
 
+    const reduceMotion = usePrefersReducedMotion();
+
     const { contextSafe } = useGSAP(() => {
         if (!serviceCardTextPartRef.current) return;
 
         // for the sake of smooth animation we are letting gsap to set transform on card
         const mm = gsap.matchMedia();
 
-        mm.add("(min-width: 1024px)", () => {
-            const height = serviceCardTextPartRef.current!.clientHeight;
+        mm.add(
+            {
+                isDesktop: "(min-width: 1024px)",
+                reduceMotion: "(prefers-reduced-motion: reduce)",
+            },
+            (context) => {
+                const { isDesktop, reduceMotion } = context.conditions as {
+                    isDesktop: boolean;
+                    reduceMotion: boolean;
+                };
 
-            gsap.set(serviceCardTextPartRef.current, {
-                y: height - 33,
-            });
-        });
+                if (isDesktop && !reduceMotion) {
+                    const height = serviceCardTextPartRef.current!.clientHeight;
+
+                    gsap.set(serviceCardTextPartRef.current, {
+                        y: height - 33,
+                    });
+                }
+            },
+        );
 
         return () => mm.revert();
     });
@@ -40,7 +56,7 @@ const ServicesSectionCard = ({ treatment }: Props) => {
     // eslint-disable-next-line react-hooks/refs
     const handleMouseEnterCard = contextSafe(() => {
         // using matchmedia so hover effect wont trigger on smaller screens
-        if (window.innerWidth < 1024) return;
+        if (window.innerWidth < 1024 || reduceMotion) return;
 
         if (tl.current) {
             tl.current.kill();
@@ -48,7 +64,7 @@ const ServicesSectionCard = ({ treatment }: Props) => {
         tl.current = gsap.timeline({
             defaults: {
                 duration: 0.3,
-                ease: "sine.inOut",
+                ease: "power2.out",
             },
         });
         tl.current
@@ -72,7 +88,7 @@ const ServicesSectionCard = ({ treatment }: Props) => {
     });
     // eslint-disable-next-line react-hooks/refs
     const handleMouseLeaveCard = contextSafe(() => {
-        if (window.innerWidth < 1024) return;
+        if (window.innerWidth < 1024 || reduceMotion) return;
 
         if (!serviceCardTextPartRef.current) return;
 
@@ -81,8 +97,8 @@ const ServicesSectionCard = ({ treatment }: Props) => {
         }
         tl.current = gsap.timeline({
             defaults: {
-                duration: 0.3,
-                ease: "sine.inOut",
+                duration: 0.2,
+                ease: "power2.out",
             },
         });
         tl.current
@@ -119,7 +135,7 @@ const ServicesSectionCard = ({ treatment }: Props) => {
                     width={500}
                     height={540}
                     quality={100}
-                    className="h-full w-full object-cover scale-110"
+                    className="h-full w-full object-cover motion-safe:lg:scale-110 motion-safe:lg:will-change-transform"
                 />
                 <div
                     ref={serviceCardOverlayRef}
@@ -128,7 +144,7 @@ const ServicesSectionCard = ({ treatment }: Props) => {
             </div>
             <div
                 ref={serviceCardTextPartRef}
-                className="text-details absolute bottom-6 left-6 z-10 flex flex-col gap-4"
+                className="text-details absolute bottom-6 left-6 z-10 flex flex-col gap-4 motion-safe:lg:will-change-transform"
             >
                 <h3 className="heading-3-body text-text-on-color">
                     {treatment.name}

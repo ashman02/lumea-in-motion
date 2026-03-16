@@ -39,91 +39,188 @@ export default function Home() {
 
     useGSAP(() => {
         // Hero Section Animations
-        gsap.set(heroHeadingRef.current, {autoAlpha: 1});
+        gsap.set(heroHeadingRef.current, { autoAlpha: 1 });
 
-        SplitText.create(heroHeadingRef.current, {
-            type: "lines",
-            autoSplit: true,
-            onSplit: (self) => {
-                gsap.fromTo(
-                    self.lines,
-                    {
-                        y: "100%",
-                        opacity: 0,
-                    },
-                    {
+        // Matchmedia for reduced motion preference
+        const mm = gsap.matchMedia();
+
+        mm.add("(prefers-reduced-motion: no-preference)", () => {
+            SplitText.create(heroHeadingRef.current, {
+                type: "lines",
+                autoSplit: true,
+                onSplit: (self) => {
+                    gsap.fromTo(
+                        self.lines,
+                        {
+                            y: "100%",
+                            opacity: 0,
+                            filter: "blur(4px)",
+                        },
+                        {
+                            y: 0,
+                            opacity: 1,
+                            filter: "blur(0px)",
+                            delay: 0.15,
+                            duration: 0.6,
+                            ease: "power4.out",
+                            stagger: 0.04,
+                        },
+                    );
+                    gsap.to(heroBtnRef.current, {
                         y: 0,
                         opacity: 1,
+                        delay: 0.3,
                         duration: 0.6,
-                        ease: "power1.out",
-                        stagger: 0.1,
-                    },
-                );
-                gsap.to(heroBtnRef.current, {
-                    y: 0,
-                    opacity: 1,
-                    delay: 0.3,
-                    duration: 0.6,
-                    ease: "power1.out",
-                });
-            },
+                        ease: "power4.out",
+                    });
+                },
+            });
+
+            // Services Section Animations
+            headingAnimationFunction(
+                servicesHeadingRef.current,
+                servicesHeadingRef.current,
+            );
+
+            pinnedHorizontalScrollAnimation(
+                servicesContainerRef,
+                servicesWrapperRef,
+            );
+
+            // About Section Animations
+            headingAnimationFunction(
+                aboutHeadingRef.current,
+                aboutHeadingRef.current,
+            );
+            headingAnimationFunction(
+                aboutDescriptionRef.current,
+                aboutDescriptionRef.current,
+            );
+            gsap.from(aboutImageRef.current, {
+                y: 100,
+                opacity: 0,
+                duration: 0.6,
+                ease: "power1.out",
+                scrollTrigger: {
+                    trigger: aboutImageRef.current,
+                    start: "top 80%",
+                },
+            });
+            gsap.from(aboutButtonRef.current, {
+                y: 48,
+                opacity: 0,
+                duration: 0.6,
+                ease: "power1.out",
+                scrollTrigger: {
+                    trigger: aboutButtonRef.current,
+                    start: "top 90%",
+                },
+            });
+
+            // Result Section Animations
+            headingAnimationFunction(
+                resultHeadingRef.current,
+                resultHeadingRef.current,
+            );
+            headingAnimationFunction(
+                resultSubheadingRef.current,
+                resultSubheadingRef.current,
+            );
+
+            pinnedHorizontalScrollAnimation(
+                resultImagesContainerRef,
+                resultWrapperRef,
+            );
         });
 
-        // Services Section Animations
-        headingAnimationFunction(
-            servicesHeadingRef.current,
-            servicesHeadingRef.current,
-        );
+        mm.add("(prefers-reduced-motion: reduce)", () => {
+            SplitText.create(heroHeadingRef.current, {
+                type: "lines",
+                autoSplit: true,
+                onSplit: (self) => {
+                    gsap.fromTo(
+                        self.lines,
+                        {
+                            opacity: 0,
+                        },
+                        {
+                            opacity: 1,
+                            delay: 0.15,
+                            duration: 0.6,
+                            ease: "power4.out",
+                            stagger: 0.04,
+                        },
+                    );
+                    gsap.to(heroBtnRef.current, {
+                        opacity: 1,
+                        delay: 0.3,
+                        duration: 0.6,
+                        ease: "power4.out",
+                    });
+                },
+            });
 
-        pinnedHorizontalScrollAnimation(
-            servicesContainerRef,
-            servicesWrapperRef,
-        );
+            // Services Section Animations
+            headingAnimationFunction(
+                servicesHeadingRef.current,
+                servicesHeadingRef.current,
+                true,
+            );
 
-        // About Section Animations
-        headingAnimationFunction(
-            aboutHeadingRef.current,
-            aboutHeadingRef.current,
-        );
-        headingAnimationFunction(
-            aboutDescriptionRef.current,
-            aboutDescriptionRef.current,
-        );
-        gsap.from(aboutImageRef.current, {
-            y: 100,
-            opacity: 0,
-            duration: 0.6,
-            ease: "power1.out",
-            scrollTrigger: {
-                trigger: aboutImageRef.current,
-                start: "top 80%",
-            },
+            pinnedHorizontalScrollAnimation(
+                servicesContainerRef,
+                servicesWrapperRef,
+            );
+
+            // About Section Animations
+            headingAnimationFunction(
+                aboutHeadingRef.current,
+                aboutHeadingRef.current,
+                true,
+            );
+            headingAnimationFunction(
+                aboutDescriptionRef.current,
+                aboutDescriptionRef.current,
+                true,
+            );
+            gsap.from(aboutImageRef.current, {
+                y: 100,
+                opacity: 0,
+                duration: 0.6,
+                ease: "power1.out",
+                scrollTrigger: {
+                    trigger: aboutImageRef.current,
+                    start: "top 80%",
+                },
+            });
+            gsap.from(aboutButtonRef.current, {
+                y: 48,
+                opacity: 0,
+                duration: 0.6,
+                ease: "power1.out",
+                scrollTrigger: {
+                    trigger: aboutButtonRef.current,
+                    start: "top 90%",
+                },
+            });
+
+            // Result Section Animations
+            headingAnimationFunction(
+                resultHeadingRef.current,
+                resultHeadingRef.current,
+                true,
+            );
+            headingAnimationFunction(
+                resultSubheadingRef.current,
+                resultSubheadingRef.current,
+                true,
+            );
+
+            pinnedHorizontalScrollAnimation(
+                resultImagesContainerRef,
+                resultWrapperRef,
+            );
         });
-        gsap.from(aboutButtonRef.current, {
-            y: 48,
-            opacity: 0,
-            duration: 0.6,
-            ease: "power1.out",
-            scrollTrigger: {
-                trigger: aboutButtonRef.current,
-                start: "top 90%",
-            },
-        });
-
-        // Result Section Animations
-        headingAnimationFunction(
-            resultHeadingRef.current,
-            resultHeadingRef.current,
-        );
-        headingAnimationFunction(
-            resultSubheadingRef.current,
-            resultSubheadingRef.current,
-        );
-
-        pinnedHorizontalScrollAnimation(
-            resultImagesContainerRef,
-            resultWrapperRef,
-        );
     }, []);
 
     return (
@@ -149,7 +246,7 @@ export default function Home() {
                         <div className="headings overflow-hidden">
                             <h1
                                 ref={heroHeadingRef}
-                                className="heading-1 max-w-100 text-center text-text-on-color md:max-w-129 lg:max-w-165 invisible"
+                                className="heading-1 invisible max-w-100 text-center text-text-on-color will-change-transform md:max-w-129 lg:max-w-165"
                             >
                                 {homeData.hero.heading}
                             </h1>
@@ -157,7 +254,7 @@ export default function Home() {
                         <Link
                             ref={heroBtnRef}
                             href={"#"}
-                            className="translate-y-12 opacity-0"
+                            className="opacity-0 motion-safe:translate-y-12 motion-safe:will-change-transform"
                         >
                             <Button title={homeData.hero.cta} rightIcon />
                         </Link>

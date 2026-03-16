@@ -9,14 +9,17 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 const headingAnimationFunction = (
     headingElement: HTMLHeadingElement | null,
     triggerSection: HTMLElement | null,
+    reduceMotion: boolean = false,
 ) => {
     const serviceHeadingSplit = SplitText.create(headingElement, {
         type: "lines",
     });
     gsap.from(serviceHeadingSplit.lines, {
-        y: "100%",
+        y: reduceMotion ? "0%" : "100%",
         opacity: 0,
-        stagger: 0.1,
+        ease: "power4.out",
+        duration: 0.45,
+        stagger: 0.02,
         scrollTrigger: {
             trigger: triggerSection,
             start: "top 80%",
