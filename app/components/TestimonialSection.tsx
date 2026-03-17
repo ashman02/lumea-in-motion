@@ -21,6 +21,8 @@ const TestimonialSection = () => {
     const currentIndexRef = useRef(0);
     const isAnimatingRef = useRef(false);
 
+    const dragInstanceRef = useRef<Draggable | null>(null);
+
     // we are using extented sildes for inifinite loop (we are adding one extra first in the last and one extar last in the first)
     const testiSlides = homeData.testimonial.testimonials;
     const extendedSlides = [
@@ -66,6 +68,12 @@ const TestimonialSection = () => {
                     isDesktop: boolean;
                     reduceMotion: boolean;
                 };
+                // Use pixels everywhere
+                const getSlidePosition = () => {
+                    const slideWidth =
+                        testimonialWrapperRef.current!.offsetWidth;
+                    return -slideWidth * currentIndexRef.current;
+                };
 
                 if (!reduceMotion) {
                     if (isDesktop) {
@@ -77,7 +85,7 @@ const TestimonialSection = () => {
 
                         // set initial position
                         gsap.set(testimonialCarouselRef.current, {
-                            xPercent: -100 * currentIndexRef.current,
+                            x: getSlidePosition(),
                         });
 
                         // Initial State of our arrow
@@ -137,7 +145,7 @@ const TestimonialSection = () => {
                             }
 
                             gsap.to(testimonialCarouselRef.current, {
-                                xPercent: -100 * currentIndexRef.current,
+                                x: getSlidePosition(),
                                 duration: 0.6,
                                 ease: "power3.inOut",
                                 onComplete: () => {
@@ -150,9 +158,7 @@ const TestimonialSection = () => {
                                         gsap.set(
                                             testimonialCarouselRef.current,
                                             {
-                                                xPercent:
-                                                    -100 *
-                                                    currentIndexRef.current,
+                                                x: getSlidePosition(),
                                             },
                                         );
                                     }
@@ -163,9 +169,7 @@ const TestimonialSection = () => {
                                         gsap.set(
                                             testimonialCarouselRef.current,
                                             {
-                                                xPercent:
-                                                    -100 *
-                                                    currentIndexRef.current,
+                                                x: getSlidePosition(),
                                             },
                                         );
                                     }
@@ -181,7 +185,7 @@ const TestimonialSection = () => {
                                 scale: 1,
                                 opacity: 1,
                                 duration: 0.3,
-                                ease: "sine.inOut",
+                                ease: "power3.out",
                             });
                         });
 
@@ -219,120 +223,146 @@ const TestimonialSection = () => {
                             gsap.to(testimonialArrowRef.current, {
                                 scale: 0,
                                 opacity: 0,
-                                duration: 0.3,
-                                ease: "sine.inOut",
+                                duration: 0.2,
+                                ease: "power3.out",
                             });
                         });
 
+                        const testiWrapperElement =
+                            testimonialWrapperRef.current;
+
                         // add listeners to the section
-                        testimonialWrapperRef.current.addEventListener(
+                        testiWrapperElement.addEventListener(
                             "pointerenter",
                             handleMouseEnter,
                         );
-                        testimonialWrapperRef.current.addEventListener(
+                        testiWrapperElement.addEventListener(
                             "pointermove",
                             handleMouseMove,
                         );
-                        testimonialWrapperRef.current.addEventListener(
+                        testiWrapperElement.addEventListener(
                             "pointerleave",
                             handleMouseLeave,
                         );
 
                         // we are adding click event on the wrapper not on the arrow
-                        testimonialWrapperRef.current.addEventListener(
+                        testiWrapperElement.addEventListener(
                             "click",
                             handleArrowClick,
                         );
 
                         // clean up
                         return () => {
-                            testimonialWrapperRef.current?.removeEventListener(
+                            testiWrapperElement?.removeEventListener(
                                 "pointerenter",
                                 handleMouseEnter,
                             );
-                            testimonialWrapperRef.current?.removeEventListener(
+                            testiWrapperElement?.removeEventListener(
                                 "pointermove",
                                 handleMouseMove,
                             );
-                            testimonialWrapperRef.current?.removeEventListener(
+                            testiWrapperElement?.removeEventListener(
                                 "pointerleave",
                                 handleMouseLeave,
                             );
-                            testimonialWrapperRef.current?.removeEventListener(
+                            testiWrapperElement?.removeEventListener(
                                 "click",
                                 handleArrowClick,
                             );
                         };
                     } else {
-                        const wrapper = testimonialWrapperRef.current!;
-                        const carousel = testimonialCarouselRef.current!;
-                        const slideWidth = wrapper.offsetWidth;
+                        const initDraggable = () => {
+                            const wrapper = testimonialWrapperRef.current!;
+                            const carousel = testimonialCarouselRef.current!;
+                            const slideWidth = wrapper.offsetWidth;
 
-                        // Set initial pixel position
-                        gsap.set(carousel, {
-                            x: -slideWidth * currentIndexRef.current,
-                        });
+                            if (dragInstanceRef.current)
+                                dragInstanceRef.current.kill();
 
-                        const dragInstance = Draggable.create(carousel, {
-                            type: "x",
-                            edgeResistance: 0.85,
-                            inertia: false,
+                            // Set initial pixel position
+                            gsap.set(carousel, {
+                                x: getSlidePosition(),
+                            });
 
-                            bounds: {
-                                minX: -slideWidth * (totalSlides + 1),
-                                maxX: 0,
-                            },
+                            dragInstanceRef.current = Draggable.create(
+                                carousel,
+                                {
+                                    type: "x",
+                                    edgeResistance: 0.85,
+                                    inertia: false,
 
-                            onDragStart: () => {
-                                isAnimatingRef.current = true;
-                            },
-
-                            onDragEnd: function () {
-                                const draggedX = this.x;
-
-                                // Calculate nearest index properly
-                                const newIndex = Math.round(
-                                    Math.abs(draggedX) / slideWidth,
-                                );
-
-                                currentIndexRef.current = newIndex;
-
-                                gsap.to(carousel, {
-                                    x: -slideWidth * currentIndexRef.current,
-                                    duration: 0.4,
-                                    ease: "power3.out",
-                                    onComplete: () => {
-                                        // Infinite loop reset logic
-                                        if (
-                                            currentIndexRef.current ===
-                                            totalSlides + 1
-                                        ) {
-                                            currentIndexRef.current = 1;
-                                            gsap.set(carousel, {
-                                                x:
-                                                    -slideWidth *
-                                                    currentIndexRef.current,
-                                            });
-                                        }
-
-                                        if (currentIndexRef.current === 0) {
-                                            currentIndexRef.current =
-                                                totalSlides;
-                                            gsap.set(carousel, {
-                                                x:
-                                                    -slideWidth *
-                                                    currentIndexRef.current,
-                                            });
-                                        }
-                                        updateActiveDot();
-                                        isAnimatingRef.current = false;
+                                    bounds: {
+                                        minX: -slideWidth * (totalSlides + 1),
+                                        maxX: 0,
                                     },
-                                });
-                            },
-                        })[0];
+
+                                    onDragStart: () => {
+                                        isAnimatingRef.current = true;
+                                    },
+
+                                    onDragEnd: function () {
+                                        const draggedX = this.x;
+
+                                        // Calculate nearest index properly
+                                        const newIndex = Math.round(
+                                            Math.abs(draggedX) / slideWidth,
+                                        );
+
+                                        currentIndexRef.current = newIndex;
+
+                                        gsap.to(carousel, {
+                                            x: getSlidePosition(),
+                                            duration: 0.4,
+                                            ease: "power3.out",
+                                            onComplete: () => {
+                                                // Infinite loop reset logic
+                                                if (
+                                                    currentIndexRef.current ===
+                                                    totalSlides + 1
+                                                ) {
+                                                    currentIndexRef.current = 1;
+                                                    gsap.set(carousel, {
+                                                        x: getSlidePosition(),
+                                                    });
+                                                }
+
+                                                if (
+                                                    currentIndexRef.current ===
+                                                    0
+                                                ) {
+                                                    currentIndexRef.current =
+                                                        totalSlides;
+                                                    gsap.set(carousel, {
+                                                        x: getSlidePosition(),
+                                                    });
+                                                }
+                                                updateActiveDot();
+                                                isAnimatingRef.current = false;
+                                            },
+                                        });
+                                    },
+                                },
+                            )[0];
+                        };
+
+                        // Call on mount
+                        initDraggable();
+
+                        // ✅ Recalculate on resize
+                        let resizeTimer: NodeJS.Timeout;
+                        const handleResize = () => {
+                            clearTimeout(resizeTimer);
+                            resizeTimer = setTimeout(() => {
+                                initDraggable();
+                            }, 150);
+                        };
+
+                        window.addEventListener("resize", handleResize);
 
                         return () => {
-                            dragInstance.kill();
+                            window.removeEventListener("resize", handleResize);
+                            clearTimeout(resizeTimer);
+                            dragInstanceRef.current?.kill();
                         };
                     }
                 } else {
@@ -356,14 +386,14 @@ const TestimonialSection = () => {
                                     currentIndexRef.current = totalSlides;
                                 }
                                 gsap.set(testimonialCarouselRef.current, {
-                                    xPercent: -100 * currentIndexRef.current,
+                                    x: getSlidePosition(),
                                 });
                                 gsap.to(testimonialCarouselRef.current, {
                                     opacity: 1,
                                     duration: 0.6,
                                     ease: "power3.out",
                                 });
-
+                                updateActiveDot();
                                 isAnimatingRef.current = false;
                             },
                         });
@@ -391,7 +421,7 @@ const TestimonialSection = () => {
                                     currentIndexRef.current = 1;
                                 }
                                 gsap.set(testimonialCarouselRef.current, {
-                                    xPercent: -100 * currentIndexRef.current,
+                                    x: getSlidePosition(),
                                 });
 
                                 gsap.to(testimonialCarouselRef.current, {
@@ -399,7 +429,7 @@ const TestimonialSection = () => {
                                     duration: 0.6,
                                     ease: "power3.inOut",
                                 });
-
+                                updateActiveDot();
                                 isAnimatingRef.current = false;
                             },
                         });
@@ -529,10 +559,9 @@ const TestimonialSection = () => {
                         >
                             <svg
                                 viewBox="0 0 24 24"
-                                height={40}
-                                width={40}
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10"
                             >
                                 <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
                                 <g
@@ -556,10 +585,9 @@ const TestimonialSection = () => {
                         >
                             <svg
                                 viewBox="0 0 24 24"
-                                height={40}
-                                width={40}
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10"
                             >
                                 <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
                                 <g
@@ -584,6 +612,8 @@ const TestimonialSection = () => {
                             <button
                                 key={index}
                                 onClick={() => {
+                                    if (isAnimatingRef.current) return; // ✅ Add guard
+                                    isAnimatingRef.current = true;
                                     const wrapper =
                                         testimonialWrapperRef.current!;
                                     const carousel =
@@ -592,10 +622,15 @@ const TestimonialSection = () => {
 
                                     const targetIndex = index + 1;
 
+                                    currentIndexRef.current = targetIndex;
+
                                     gsap.to(carousel, {
                                         x: -slideWidth * targetIndex,
                                         duration: 0.4,
                                         ease: "power3.out",
+                                        onComplete: () => {
+                                            isAnimatingRef.current = false;
+                                        },
                                     });
 
                                     setActiveIndex(index);
