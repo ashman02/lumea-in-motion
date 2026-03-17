@@ -100,7 +100,7 @@ const TestimonialSection = () => {
                             testimonialArrowRef.current,
                             "x",
                             {
-                                duration: 0.6,
+                                duration: 0.3,
                                 ease: "power3.out",
                             },
                         );
@@ -109,7 +109,7 @@ const TestimonialSection = () => {
                             testimonialArrowRef.current,
                             "y",
                             {
-                                duration: 0.6,
+                                duration: 0.3,
                                 ease: "power3.out",
                             },
                         );
@@ -124,7 +124,23 @@ const TestimonialSection = () => {
                             },
                         );
 
-                        // Remember after doing this all wrap every function with contextSafe
+                        // ✅ Cache bounds using PAGE coordinates
+                        let cachedBounds: {
+                            left: number;
+                            top: number;
+                            width: number;
+                        } | null = null;
+
+                        const updateBoundsCache = () => {
+                            if (!testimonialWrapperRef.current) return;
+                            const rect =
+                                testimonialWrapperRef.current.getBoundingClientRect();
+                            cachedBounds = {
+                                left: rect.left + window.scrollX, // ✅ Absolute page position
+                                top: rect.top + window.scrollY, // ✅ Absolute page position
+                                width: rect.width,
+                            };
+                        };
 
                         const handleArrowClick = contextSafe(() => {
                             if (
@@ -182,6 +198,8 @@ const TestimonialSection = () => {
 
                         // visible the mouse when pointer enters in the section
                         const handleMouseEnter = contextSafe(() => {
+                            // ✅ Calculate bounds ONCE when mouse enters
+                            updateBoundsCache();
                             gsap.to(testimonialArrowRef.current, {
                                 scale: 1,
                                 opacity: 1,
@@ -193,27 +211,20 @@ const TestimonialSection = () => {
                         // When pointer is moving in the section make arrow to follow the pointer
                         const handleMouseMove = contextSafe(
                             (e: PointerEvent) => {
-                                if (!testimonialWrapperRef.current) return;
-                                // we are calculating bounds on every event call but we can store that when mouse enter's in the wrapper and reuse those as well. (performance optimization for later)
-                                const bounds =
-                                    testimonialWrapperRef.current.getBoundingClientRect();
+                                if (!cachedBounds) return;
 
-                                // cursor position relative to the section
-                                const x = e.clientX - bounds.left;
-                                const y = e.clientY - bounds.top;
+                                // ✅ Use pageX/pageY with absolute cached positions
+                                const x = e.pageX - cachedBounds.left;
+                                const y = e.pageY - cachedBounds.top;
 
-                                // smoothly animate
                                 xTo(x);
                                 yTo(y);
 
-                                // 🔥 Determine arrow direction based on horizontal position
-                                const halfWidth = bounds.width / 2;
+                                const halfWidth = cachedBounds.width / 2;
 
                                 if (x < halfWidth) {
-                                    // Cursor is in left half → show left arrow
                                     rotateTo(180);
                                 } else {
-                                    // Cursor is in right half → show right arrow
                                     rotateTo(0);
                                 }
                             },
@@ -227,6 +238,8 @@ const TestimonialSection = () => {
                                 duration: 0.2,
                                 ease: "power3.out",
                             });
+                            // ✅ Clear cache when mouse leaves
+                            cachedBounds = null;
                         });
 
                         const testiWrapperElement =
@@ -252,6 +265,14 @@ const TestimonialSection = () => {
                             handleArrowClick,
                         );
 
+                        // ✅ Update cache on window resize
+                        const handleResize = () => {
+                            if (cachedBounds) {
+                                updateBoundsCache();
+                            }
+                        };
+                        window.addEventListener("resize", handleResize);
+
                         // clean up
                         return () => {
                             testiWrapperElement?.removeEventListener(
@@ -270,6 +291,7 @@ const TestimonialSection = () => {
                                 "click",
                                 handleArrowClick,
                             );
+                            window.removeEventListener("resize", handleResize);
                         };
                     } else {
                         const initDraggable = () => {
@@ -527,7 +549,7 @@ const TestimonialSection = () => {
                     {/* Arrow for motion safe */}
                     <div
                         ref={testimonialArrowRef}
-                        className="arrow pointer-events-none absolute -top-8 -left-10 z-10 hidden h-18 w-18 items-center justify-center rounded-full border border-border-base bg-blend-difference backdrop-blur-xs motion-safe:lg:flex"
+                        className="arrow pointer-events-none absolute -top-9 -left-9 z-10 hidden h-18 w-18 items-center justify-center rounded-full border border-border-base bg-blend-difference backdrop-blur-xs motion-safe:lg:flex"
                     >
                         <ArrowIcon className="h-10 w-10" />
                     </div>
@@ -543,7 +565,7 @@ const TestimonialSection = () => {
                             ref={testimonialRightArrowRef}
                             className="arrow flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border-base bg-blend-difference backdrop-blur-xs md:h-14 md:w-14 lg:h-18 lg:w-18"
                         >
-                           <ArrowIcon className="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10" />
+                            <ArrowIcon className="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10" />
                         </div>
                     </div>
                     {/* Pagination Dots */}
