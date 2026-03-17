@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { headingAnimationFunction } from "../utils/gsapAnim";
 import { Draggable } from "gsap/all";
+import ArrowIcon from "./ArrowIcon";
 
 gsap.registerPlugin(useGSAP, Draggable);
 
@@ -528,28 +529,7 @@ const TestimonialSection = () => {
                         ref={testimonialArrowRef}
                         className="arrow pointer-events-none absolute -top-8 -left-10 z-10 hidden h-18 w-18 items-center justify-center rounded-full border border-border-base bg-blend-difference backdrop-blur-xs will-change-transform motion-safe:lg:flex"
                     >
-                        <svg
-                            viewBox="0 0 24 24"
-                            height={40}
-                            width={40}
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                            <g
-                                id="SVGRepo_tracerCarrier"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            ></g>
-                            <g id="SVGRepo_iconCarrier">
-                                <path
-                                    fillRule="evenodd"
-                                    clipRule="evenodd"
-                                    d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"
-                                    fill={"var(--color-text-base)"}
-                                ></path>
-                            </g>
-                        </svg>
+                        <ArrowIcon className="h-10 w-10" />
                     </div>
                     {/* Arrows for motion reduce */}
                     <div className="absolute top-[calc(50%-44px)] left-0 flex w-full items-center justify-between px-3 motion-safe:hidden md:px-2 lg:px-8">
@@ -557,53 +537,13 @@ const TestimonialSection = () => {
                             ref={testimonialLeftArrowRef}
                             className="arrow flex h-10 w-10 rotate-180 cursor-pointer items-center justify-center rounded-full border border-border-base bg-blend-difference backdrop-blur-xs md:h-14 md:w-14 lg:h-18 lg:w-18"
                         >
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10"
-                            >
-                                <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                                <g
-                                    id="SVGRepo_tracerCarrier"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                ></g>
-                                <g id="SVGRepo_iconCarrier">
-                                    <path
-                                        fillRule="evenodd"
-                                        clipRule="evenodd"
-                                        d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"
-                                        fill={"var(--color-text-base)"}
-                                    ></path>
-                                </g>
-                            </svg>
+                            <ArrowIcon className="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10" />
                         </div>
                         <div
                             ref={testimonialRightArrowRef}
                             className="arrow flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border-base bg-blend-difference backdrop-blur-xs md:h-14 md:w-14 lg:h-18 lg:w-18"
                         >
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10"
-                            >
-                                <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                                <g
-                                    id="SVGRepo_tracerCarrier"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                ></g>
-                                <g id="SVGRepo_iconCarrier">
-                                    <path
-                                        fillRule="evenodd"
-                                        clipRule="evenodd"
-                                        d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"
-                                        fill={"var(--color-text-base)"}
-                                    ></path>
-                                </g>
-                            </svg>
+                           <ArrowIcon className="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10" />
                         </div>
                     </div>
                     {/* Pagination Dots */}
