@@ -100,8 +100,8 @@ const TestimonialSection = () => {
                             testimonialArrowRef.current,
                             "x",
                             {
-                                duration: 0.3,
-                                ease: "power3.inOut",
+                                duration: 0.6,
+                                ease: "power3.out",
                             },
                         );
 
@@ -109,8 +109,8 @@ const TestimonialSection = () => {
                             testimonialArrowRef.current,
                             "y",
                             {
-                                duration: 0.3,
-                                ease: "power3.inOut",
+                                duration: 0.6,
+                                ease: "power3.out",
                             },
                         );
 
@@ -120,7 +120,7 @@ const TestimonialSection = () => {
                             "rotation",
                             {
                                 duration: 0.3,
-                                ease: "power3.inOut",
+                                ease: "power3.out",
                             },
                         );
 
@@ -527,7 +527,7 @@ const TestimonialSection = () => {
                     {/* Arrow for motion safe */}
                     <div
                         ref={testimonialArrowRef}
-                        className="arrow pointer-events-none absolute -top-8 -left-10 z-10 hidden h-18 w-18 items-center justify-center rounded-full border border-border-base bg-blend-difference backdrop-blur-xs will-change-transform motion-safe:lg:flex"
+                        className="arrow pointer-events-none absolute -top-8 -left-10 z-10 hidden h-18 w-18 items-center justify-center rounded-full border border-border-base bg-blend-difference backdrop-blur-xs motion-safe:lg:flex"
                     >
                         <ArrowIcon className="h-10 w-10" />
                     </div>
