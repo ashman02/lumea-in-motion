@@ -18,6 +18,8 @@ const TestimonialSection = () => {
 
     // state for index to calculate pagination
     const [activeIndex, setActiveIndex] = useState(0);
+    const currentIndexRef = useRef(0);
+    const isAnimatingRef = useRef(false);
 
     // we are using extented sildes for inifinite loop (we are adding one extra first in the last and one extar last in the first)
     const testiSlides = homeData.testimonial.testimonials;
@@ -36,17 +38,14 @@ const TestimonialSection = () => {
         // Carousel code
         const totalSlides = testiSlides.length;
         // we are starting from one because 0th is cloned (last) one.
-        let currentIndex = 1;
-
-        let isAnimating = false;
 
         const updateActiveDot = () => {
             const realIndex =
-                currentIndex === 0
+                currentIndexRef.current === 0
                     ? totalSlides - 1
-                    : currentIndex === totalSlides + 1
+                    : currentIndexRef.current === totalSlides + 1
                       ? 0
-                      : currentIndex - 1;
+                      : currentIndexRef.current - 1;
 
             setActiveIndex(realIndex);
         };
@@ -78,7 +77,7 @@ const TestimonialSection = () => {
 
                         // set initial position
                         gsap.set(testimonialCarouselRef.current, {
-                            xPercent: -100 * currentIndex,
+                            xPercent: -100 * currentIndexRef.current,
                         });
 
                         // Initial State of our arrow
@@ -119,49 +118,59 @@ const TestimonialSection = () => {
                         // Remember after doing this all wrap every function with contextSafe
 
                         const handleArrowClick = contextSafe(() => {
-                            if (!testimonialCarouselRef.current || isAnimating)
+                            if (
+                                !testimonialCarouselRef.current ||
+                                isAnimatingRef.current
+                            )
                                 return;
 
-                            isAnimating = true;
+                            isAnimatingRef.current = true;
 
                             const rotation = gsap.getProperty(
                                 testimonialArrowRef.current,
                                 "rotation",
                             ) as number;
                             if (rotation === 0) {
-                                currentIndex++;
+                                currentIndexRef.current++;
                             } else {
-                                currentIndex--;
+                                currentIndexRef.current--;
                             }
 
                             gsap.to(testimonialCarouselRef.current, {
-                                xPercent: -100 * currentIndex,
+                                xPercent: -100 * currentIndexRef.current,
                                 duration: 0.6,
                                 ease: "power3.inOut",
                                 onComplete: () => {
                                     // If we hit the fake last clone
-                                    if (currentIndex === totalSlides + 1) {
-                                        currentIndex = 1;
+                                    if (
+                                        currentIndexRef.current ===
+                                        totalSlides + 1
+                                    ) {
+                                        currentIndexRef.current = 1;
                                         gsap.set(
                                             testimonialCarouselRef.current,
                                             {
-                                                xPercent: -100 * currentIndex,
+                                                xPercent:
+                                                    -100 *
+                                                    currentIndexRef.current,
                                             },
                                         );
                                     }
 
                                     // If we hit the fake first clone
-                                    if (currentIndex === 0) {
-                                        currentIndex = totalSlides;
+                                    if (currentIndexRef.current === 0) {
+                                        currentIndexRef.current = totalSlides;
                                         gsap.set(
                                             testimonialCarouselRef.current,
                                             {
-                                                xPercent: -100 * currentIndex,
+                                                xPercent:
+                                                    -100 *
+                                                    currentIndexRef.current,
                                             },
                                         );
                                     }
-
-                                    isAnimating = false;
+                                    updateActiveDot();
+                                    isAnimatingRef.current = false;
                                 },
                             });
                         });
@@ -261,7 +270,7 @@ const TestimonialSection = () => {
 
                         // Set initial pixel position
                         gsap.set(carousel, {
-                            x: -slideWidth * currentIndex,
+                            x: -slideWidth * currentIndexRef.current,
                         });
 
                         const dragInstance = Draggable.create(carousel, {
@@ -275,7 +284,7 @@ const TestimonialSection = () => {
                             },
 
                             onDragStart: () => {
-                                isAnimating = true;
+                                isAnimatingRef.current = true;
                             },
 
                             onDragEnd: function () {
@@ -286,29 +295,37 @@ const TestimonialSection = () => {
                                     Math.abs(draggedX) / slideWidth,
                                 );
 
-                                currentIndex = newIndex;
+                                currentIndexRef.current = newIndex;
 
                                 gsap.to(carousel, {
-                                    x: -slideWidth * currentIndex,
+                                    x: -slideWidth * currentIndexRef.current,
                                     duration: 0.4,
                                     ease: "power3.out",
                                     onComplete: () => {
                                         // Infinite loop reset logic
-                                        if (currentIndex === totalSlides + 1) {
-                                            currentIndex = 1;
+                                        if (
+                                            currentIndexRef.current ===
+                                            totalSlides + 1
+                                        ) {
+                                            currentIndexRef.current = 1;
                                             gsap.set(carousel, {
-                                                x: -slideWidth * currentIndex,
+                                                x:
+                                                    -slideWidth *
+                                                    currentIndexRef.current,
                                             });
                                         }
 
-                                        if (currentIndex === 0) {
-                                            currentIndex = totalSlides;
+                                        if (currentIndexRef.current === 0) {
+                                            currentIndexRef.current =
+                                                totalSlides;
                                             gsap.set(carousel, {
-                                                x: -slideWidth * currentIndex,
+                                                x:
+                                                    -slideWidth *
+                                                    currentIndexRef.current,
                                             });
                                         }
                                         updateActiveDot();
-                                        isAnimating = false;
+                                        isAnimatingRef.current = false;
                                     },
                                 });
                             },
@@ -320,11 +337,14 @@ const TestimonialSection = () => {
                     }
                 } else {
                     const handleLeftArrowClick = contextSafe(() => {
-                        if (!testimonialCarouselRef.current || isAnimating)
+                        if (
+                            !testimonialCarouselRef.current ||
+                            isAnimatingRef.current
+                        )
                             return;
 
-                        isAnimating = true;
-                        currentIndex--;
+                        isAnimatingRef.current = true;
+                        currentIndexRef.current--;
 
                         gsap.to(testimonialCarouselRef.current, {
                             opacity: 0,
@@ -332,11 +352,11 @@ const TestimonialSection = () => {
                             ease: "power3.out",
                             onComplete: () => {
                                 // If we hit the fake first clone
-                                if (currentIndex === 0) {
-                                    currentIndex = totalSlides;
+                                if (currentIndexRef.current === 0) {
+                                    currentIndexRef.current = totalSlides;
                                 }
                                 gsap.set(testimonialCarouselRef.current, {
-                                    xPercent: -100 * currentIndex,
+                                    xPercent: -100 * currentIndexRef.current,
                                 });
                                 gsap.to(testimonialCarouselRef.current, {
                                     opacity: 1,
@@ -344,16 +364,19 @@ const TestimonialSection = () => {
                                     ease: "power3.out",
                                 });
 
-                                isAnimating = false;
+                                isAnimatingRef.current = false;
                             },
                         });
                     });
                     const handleRightArrowClick = contextSafe(() => {
-                        if (!testimonialCarouselRef.current || isAnimating)
+                        if (
+                            !testimonialCarouselRef.current ||
+                            isAnimatingRef.current
+                        )
                             return;
 
-                        isAnimating = true;
-                        currentIndex++;
+                        isAnimatingRef.current = true;
+                        currentIndexRef.current++;
 
                         gsap.to(testimonialCarouselRef.current, {
                             opacity: 0,
@@ -361,11 +384,14 @@ const TestimonialSection = () => {
                             ease: "power3.inOut",
                             onComplete: () => {
                                 // If we hit the fake last clone
-                                if (currentIndex === totalSlides + 1) {
-                                    currentIndex = 1;
+                                if (
+                                    currentIndexRef.current ===
+                                    totalSlides + 1
+                                ) {
+                                    currentIndexRef.current = 1;
                                 }
                                 gsap.set(testimonialCarouselRef.current, {
-                                    xPercent: -100 * currentIndex,
+                                    xPercent: -100 * currentIndexRef.current,
                                 });
 
                                 gsap.to(testimonialCarouselRef.current, {
@@ -374,7 +400,7 @@ const TestimonialSection = () => {
                                     ease: "power3.inOut",
                                 });
 
-                                isAnimating = false;
+                                isAnimatingRef.current = false;
                             },
                         });
                     });
