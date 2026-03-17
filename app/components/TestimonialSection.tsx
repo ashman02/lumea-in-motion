@@ -19,7 +19,7 @@ const TestimonialSection = () => {
 
     // state for index to calculate pagination
     const [activeIndex, setActiveIndex] = useState(0);
-    const currentIndexRef = useRef(0);
+    const currentIndexRef = useRef(1);
     const isAnimatingRef = useRef(false);
 
     const dragInstanceRef = useRef<Draggable | null>(null);
