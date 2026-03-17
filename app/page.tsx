@@ -208,11 +208,6 @@ export default function Home() {
                 resultSubheadingRef.current,
                 true,
             );
-
-            pinnedHorizontalScrollAnimation(
-                resultImagesContainerRef,
-                resultWrapperRef,
-            );
         });
 
         return () => mm.revert();
@@ -348,12 +343,12 @@ export default function Home() {
                     <div className="">
                         <div
                             ref={resultImagesContainerRef}
-                            className="flex gap-4 md:gap-5 lg:gap-6"
+                            className="flex grid-cols-1 gap-4 motion-reduce:grid md:grid-cols-2 md:gap-5 lg:grid-cols-3 lg:gap-6 2xl:grid-cols-4"
                         >
                             {homeData.result.images.map((img, idx) => (
                                 <div
                                     key={idx}
-                                    className="relative aspect-400/500 w-full shrink-0 overflow-hidden rounded-4 md:w-100 md:rounded-5 lg:rounded-6 2xl:w-1/4"
+                                    className="relative aspect-400/500 w-full shrink-0 overflow-hidden rounded-4 md:w-100 md:rounded-5 motion-reduce:md:w-full lg:rounded-6 2xl:w-1/4 motion-reduce:2xl:w-full"
                                 >
                                     <Image
                                         src={img}
