@@ -6,11 +6,11 @@ import Button from "./Button";
 import {
     AnimatePresence,
     motion,
+    MotionConfig,
     useMotionValueEvent,
     useReducedMotion,
     useScroll,
 } from "motion/react";
-
 
 const Navbar = () => {
     const path = usePathname();
@@ -46,20 +46,14 @@ const Navbar = () => {
 
     // is menu bar open or not
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const menuRef = useRef<HTMLElement>(null);
     const headerRef = useRef<HTMLElement>(null);
-    const barsRef = useRef({
-        top: null as SVGRectElement | null,
-        middle: null as SVGRectElement | null,
-        bottom: null as SVGRectElement | null,
-    });
-    const navItemsRef = useRef<HTMLLIElement[]>([]);
-    const socialsRef = useRef<HTMLUListElement>(null);
     const { scrollY } = useScroll();
     const [isVisible, setIsVisible] = useState(true);
     const [initialClipPath, setInitialClipPath] = useState<string | null>(null);
 
+    // To know in which direction we are scrolling.
     useMotionValueEvent(scrollY, "change", (current) => {
+        if (isMenuOpen) return;
         const previous = scrollY.getPrevious() || 0;
         const diff = current - previous;
 
@@ -80,7 +74,7 @@ const Navbar = () => {
     const getHeaderClip = () => {
         if (!headerRef.current) {
             // Fallback: use a small centered rectangle as placeholder
-            return "inset(20px calc(50% - 160px) calc(100% - 60px) calc(50% - 160px) round 12px)";
+            return "inset(16px calc(50% - 160px) calc(100% - 88px) calc(50% - 160px) round 12px)";
         }
         const rect = headerRef.current.getBoundingClientRect();
 
@@ -100,22 +94,82 @@ const Navbar = () => {
             : {
                   clipPath:
                       initialClipPath ||
-                      "inset(20px calc(50% - 160px) calc(100% - 60px) calc(50% - 160px) round 12px)",
+                      "inset(16px calc(50% - 160px) calc(100% - 88px) calc(50% - 160px) round 12px)",
               },
         open: reduceMotion
             ? { opacity: 1 }
             : { clipPath: "inset(0px 0px 0px 0px round 0px)" },
     };
 
+    // Nav Items Variants
+    const navItemVariants = {
+        closed: {
+            opacity: 0,
+            y: reduceMotion ? 0 : 48,
+        },
+        open: {
+            opacity: 1,
+            y: 0,
+        },
+    };
+
+    // Nav social variants
+    const navSocialVariants = {
+        closed: { opacity: 0 },
+        open: { opacity: 1 },
+    };
+
+    // Hamburger bar variants
+    const topBarVariants = {
+        closed: {
+            rotate: 0,
+            y: 0,
+        },
+        open: {
+            rotate: 45,
+            y: 9,
+        },
+    };
+
+    const middleBarVariants = {
+        closed: {
+            scaleX: 1,
+            opacity: 1,
+        },
+        open: {
+            scaleX: 0,
+            opacity: 0,
+        },
+    };
+
+    const bottomBarVariants = {
+        closed: {
+            rotate: 0,
+            y: 0,
+        },
+        open: {
+            rotate: -45,
+            y: -7.25,
+        },
+    };
+
     return (
         <>
             <motion.header
                 ref={headerRef}
-                initial={{ opacity: 0, y: reduceMotion ? 0 : -88 }}
+                initial={{
+                    opacity: 0,
+                    y: reduceMotion ? 0 : -88,
+                    filter: "blur(4px)",
+                }}
                 animate={
                     isVisible
-                        ? { opacity: 1, y: 0 }
-                        : { opacity: 0, y: reduceMotion ? 0 : -88 }
+                        ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                        : {
+                              opacity: 0,
+                              y: reduceMotion ? 0 : -88,
+                              filter: "blur(4px)",
+                          }
                 }
                 transition={{
                     type: "spring",
@@ -151,41 +205,46 @@ const Navbar = () => {
                             setIsMenuOpen((prev) => !prev);
                         }}
                     >
-                        <svg width="32" height="32" viewBox="0 0 32 32">
-                            <rect
-                                ref={(el) => {
-                                    barsRef.current.top = el;
-                                }}
-                                className="bar top fill-text-base"
-                                width="32"
-                                height="2"
-                                x="2"
-                                y="6"
-                                rx="2"
-                            />
-                            <rect
-                                ref={(el) => {
-                                    barsRef.current.middle = el;
-                                }}
-                                className="bar middle fill-text-base"
-                                width="32"
-                                height="2"
-                                x="2"
-                                y="14.5"
-                                rx="2"
-                            />
-                            <rect
-                                ref={(el) => {
-                                    barsRef.current.bottom = el;
-                                }}
-                                className="bar bottom fill-text-base"
-                                width="32"
-                                height="2"
-                                x="2"
-                                y="23"
-                                rx="2"
-                            />
-                        </svg>
+                        <MotionConfig
+                            transition={{
+                                type: "spring",
+                                duration: 0.2,
+                                bounce: 0,
+                            }}
+                        >
+                            <svg width="32" height="32" viewBox="0 0 32 32">
+                                <motion.rect
+                                    variants={topBarVariants}
+                                    animate={isMenuOpen ? "open" : "closed"}
+                                    className="bar top fill-text-base"
+                                    width="32"
+                                    height="2"
+                                    x="2"
+                                    y="6"
+                                    rx="2"
+                                />
+                                <motion.rect
+                                    variants={middleBarVariants}
+                                    animate={isMenuOpen ? "open" : "closed"}
+                                    className="bar middle fill-text-base"
+                                    width="32"
+                                    height="2"
+                                    x="2"
+                                    y="14.5"
+                                    rx="2"
+                                />
+                                <motion.rect
+                                    variants={bottomBarVariants}
+                                    animate={isMenuOpen ? "open" : "closed"}
+                                    className="bar bottom fill-text-base"
+                                    width="32"
+                                    height="2"
+                                    x="2"
+                                    y="23"
+                                    rx="2"
+                                />
+                            </svg>
+                        </MotionConfig>
                     </div>
                 </div>
             </motion.header>
@@ -194,7 +253,6 @@ const Navbar = () => {
             <AnimatePresence>
                 {isMenuOpen && (
                     <motion.nav
-                        ref={menuRef}
                         variants={menuVariants}
                         initial="closed"
                         animate="open"
@@ -203,16 +261,21 @@ const Navbar = () => {
                             type: "spring",
                             duration: 0.3,
                             bounce: 0,
+                            delayChildren: 0.1,
+                            staggerChildren: 0.02,
                         }}
                         className="fixed top-0 right-0 bottom-0 left-0 z-10 flex w-full flex-col items-center justify-end gap-16 bg-bg-subtle px-6 pb-10 will-change-auto lg:hidden"
                     >
                         <ul className="menu-items flex w-full max-w-100 flex-col gap-12 md:max-w-150">
                             {navItems.map((item, idx) => (
-                                <li
-                                    key={item.name}
-                                    ref={(el) => {
-                                        if (el) navItemsRef.current[idx] = el;
+                                <motion.li
+                                    variants={navItemVariants}
+                                    transition={{
+                                        type: "spring",
+                                        duration: 0.2,
+                                        bounce: 0,
                                     }}
+                                    key={item.name}
                                     className="nav-smaller-screen-items min-w-full will-change-transform"
                                     style={{
                                         textAlign: idx === 1 ? "end" : "start",
@@ -225,15 +288,21 @@ const Navbar = () => {
                                     >
                                         {item.name}
                                     </Link>
-                                </li>
+                                </motion.li>
                             ))}
                         </ul>
-                        <ul
-                            className="nav-smaller-screen-socials flex gap-4"
-                            ref={socialsRef}
-                        >
+                        <ul className="nav-smaller-screen-socials flex gap-4">
                             {socialMediaAccounts.map((account) => (
-                                <li key={account.title}>
+                                <motion.li
+                                    key={account.title}
+                                    variants={navSocialVariants}
+                                    transition={{
+                                        type: "spring",
+                                        duration: 0.2,
+                                        bounce: 0,
+                                        delay: 0.25,
+                                    }}
+                                >
                                     <Link
                                         href={account.link}
                                         target="_blank"
@@ -241,7 +310,7 @@ const Navbar = () => {
                                     >
                                         {account.title}
                                     </Link>
-                                </li>
+                                </motion.li>
                             ))}
                         </ul>
                     </motion.nav>
