@@ -3,25 +3,12 @@ import Image from "next/image";
 import { homeData } from "./utils/data";
 import Button from "./components/Button";
 import Link from "next/link";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { useRef } from "react";
-import { SplitText } from "gsap/SplitText";
 import ServicesSectionCard from "./components/ServicesSectionCard";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import {
-    headingAnimationFunction,
-    pinnedHorizontalScrollAnimation,
-} from "./utils/gsapAnim";
 import TestimonialSection from "./components/TestimonialSection";
-
-gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
+import { motion } from "motion/react";
 
 export default function Home() {
-    const heroSectionRef = useRef<HTMLDivElement>(null);
-    const heroHeadingRef = useRef<HTMLHeadingElement>(null);
-    const heroBtnRef = useRef<HTMLAnchorElement>(null);
-
     const servicesSectionRef = useRef<HTMLDivElement>(null);
     const servicesHeadingRef = useRef<HTMLHeadingElement>(null);
     const servicesWrapperRef = useRef<HTMLDivElement>(null);
@@ -37,185 +24,9 @@ export default function Home() {
     const resultWrapperRef = useRef<HTMLDivElement>(null);
     const resultImagesContainerRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(() => {
-        // Hero Section Animations
-        gsap.set(heroHeadingRef.current, { autoAlpha: 1 });
-
-        // Matchmedia for reduced motion preference
-        const mm = gsap.matchMedia();
-
-        mm.add("(prefers-reduced-motion: no-preference)", () => {
-            SplitText.create(heroHeadingRef.current, {
-                type: "lines",
-                autoSplit: true,
-                onSplit: (self) => {
-                    gsap.fromTo(
-                        self.lines,
-                        {
-                            y: "100%",
-                            opacity: 0,
-                            filter: "blur(4px)",
-                        },
-                        {
-                            y: 0,
-                            opacity: 1,
-                            filter: "blur(0px)",
-                            delay: 0.15,
-                            duration: 0.6,
-                            ease: "power4.out",
-                            stagger: 0.04,
-                        },
-                    );
-                    gsap.to(heroBtnRef.current, {
-                        y: 0,
-                        opacity: 1,
-                        delay: 0.3,
-                        duration: 0.6,
-                        ease: "power4.out",
-                    });
-                },
-            });
-
-            // Services Section Animations
-            headingAnimationFunction(
-                servicesHeadingRef.current,
-                servicesHeadingRef.current,
-            );
-
-            pinnedHorizontalScrollAnimation(
-                servicesContainerRef,
-                servicesWrapperRef,
-            );
-
-            // About Section Animations
-            headingAnimationFunction(
-                aboutHeadingRef.current,
-                aboutHeadingRef.current,
-            );
-            headingAnimationFunction(
-                aboutDescriptionRef.current,
-                aboutDescriptionRef.current,
-            );
-            gsap.from(aboutImageRef.current, {
-                y: 100,
-                opacity: 0,
-                duration: 0.5,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: aboutImageRef.current,
-                    start: "top 80%",
-                },
-            });
-            gsap.from(aboutButtonRef.current, {
-                y: 48,
-                opacity: 0,
-                duration: 0.4,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: aboutButtonRef.current,
-                    start: "top 90%",
-                },
-            });
-
-            // Result Section Animations
-            headingAnimationFunction(
-                resultHeadingRef.current,
-                resultHeadingRef.current,
-            );
-            headingAnimationFunction(
-                resultSubheadingRef.current,
-                resultSubheadingRef.current,
-            );
-
-            pinnedHorizontalScrollAnimation(
-                resultImagesContainerRef,
-                resultWrapperRef,
-            );
-        });
-
-        mm.add("(prefers-reduced-motion: reduce)", () => {
-            SplitText.create(heroHeadingRef.current, {
-                type: "lines",
-                autoSplit: true,
-                onSplit: (self) => {
-                    gsap.fromTo(
-                        self.lines,
-                        {
-                            opacity: 0,
-                        },
-                        {
-                            opacity: 1,
-                            delay: 0.15,
-                            duration: 0.6,
-                            ease: "power4.out",
-                            stagger: 0.04,
-                        },
-                    );
-                    gsap.to(heroBtnRef.current, {
-                        opacity: 1,
-                        delay: 0.3,
-                        duration: 0.6,
-                        ease: "power4.out",
-                    });
-                },
-            });
-
-            // Services Section Animations
-            headingAnimationFunction(
-                servicesHeadingRef.current,
-                servicesHeadingRef.current,
-                true,
-            );
-
-            // About Section Animations
-            headingAnimationFunction(
-                aboutHeadingRef.current,
-                aboutHeadingRef.current,
-                true,
-            );
-            headingAnimationFunction(
-                aboutDescriptionRef.current,
-                aboutDescriptionRef.current,
-                true,
-            );
-            gsap.from(aboutImageRef.current, {
-                opacity: 0,
-                duration: 0.5,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: aboutImageRef.current,
-                    start: "top 80%",
-                },
-            });
-            gsap.from(aboutButtonRef.current, {
-                opacity: 0,
-                duration: 0.4,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: aboutButtonRef.current,
-                    start: "top 90%",
-                },
-            });
-
-            // Result Section Animations
-            headingAnimationFunction(
-                resultHeadingRef.current,
-                resultHeadingRef.current,
-                true,
-            );
-            headingAnimationFunction(
-                resultSubheadingRef.current,
-                resultSubheadingRef.current,
-                true,
-            );
-        });
-
-        return () => mm.revert();
-    }, []);
-
     return (
         <main>
-            <section ref={heroSectionRef} className="hero-section">
+            <section className="hero-section">
                 <div className="relative flex h-screen min-h-125 w-full items-center justify-center">
                     <div className="Image-div absolute top-0 right-0 bottom-0 left-0">
                         <Image
@@ -234,20 +45,51 @@ export default function Home() {
                         className="text-part relative z-10 flex flex-col items-center gap-12 px-6"
                     >
                         <div className="headings overflow-hidden">
-                            <h1
-                                ref={heroHeadingRef}
-                                className="heading-1 invisible max-w-100 text-center text-text-on-color will-change-transform md:max-w-129 lg:max-w-165"
+                            <motion.h1
+                                initial={{
+                                    y: "100%",
+                                    opacity: 0,
+                                    filter: "blur(4px)",
+                                }}
+                                animate={{
+                                    y: "0%",
+                                    opacity: 1,
+                                    filter: "blur(0px)",
+                                }}
+                                transition={{
+                                    type: "spring",
+                                    duration: 0.6,
+                                    bounce: 0,
+                                    delay: 0.05,
+                                }}
+                                className="heading-1 max-w-100 text-center text-text-on-color will-change-transform md:max-w-129 lg:max-w-165"
                             >
                                 {homeData.hero.heading}
-                            </h1>
+                            </motion.h1>
                         </div>
-                        <Link
-                            ref={heroBtnRef}
-                            href={"#"}
-                            className="opacity-0 motion-safe:translate-y-12 motion-safe:will-change-transform"
+                        <motion.div
+                            initial={{
+                                y: "100%",
+                                opacity: 0,
+                            }}
+                            animate={{
+                                y: "0%",
+                                opacity: 1,
+                            }}
+                            transition={{
+                                type: "spring",
+                                duration: 0.6,
+                                bounce: 0,
+                                delay: 0.2,
+                            }}
                         >
-                            <Button title={homeData.hero.cta} rightIcon />
-                        </Link>
+                            <Link
+                                href={"#"}
+                                className="motion-safe:will-change-transform"
+                            >
+                                <Button title={homeData.hero.cta} rightIcon />
+                            </Link>
+                        </motion.div>
                     </div>
                 </div>
             </section>

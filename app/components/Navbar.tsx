@@ -173,7 +173,7 @@ const Navbar = () => {
                 }
                 transition={{
                     type: "spring",
-                    duration: isVisible ? 0.4 : 0.22,
+                    duration: isVisible ? 0.6 : 0.3,
                     bounce: 0,
                 }}
                 className="fixed top-3 left-[calc(50%-160px)] z-20 flex w-[320px] items-center justify-between rounded-2 bg-bg-base px-4 py-3 shadow-md will-change-transform md:top-4 md:left-[calc(50%-240px)] md:w-120 md:rounded-3 md:px-6 md:py-4 lg:left-[calc(50%-384px)] lg:w-3xl"
