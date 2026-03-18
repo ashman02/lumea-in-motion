@@ -7,10 +7,10 @@ import { useRef } from "react";
 import ServicesSectionCard from "./components/ServicesSectionCard";
 import TestimonialSection from "./components/TestimonialSection";
 import { motion } from "motion/react";
+import SectionHeader from "./components/SectionHeader";
 
 export default function Home() {
     const servicesSectionRef = useRef<HTMLDivElement>(null);
-    const servicesHeadingRef = useRef<HTMLHeadingElement>(null);
     const servicesWrapperRef = useRef<HTMLDivElement>(null);
     const servicesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -101,14 +101,7 @@ export default function Home() {
                     ref={servicesWrapperRef}
                     className="main-container vertical-flex items-center"
                 >
-                    <div className="heading-container overflow-hidden">
-                        <h2
-                            ref={servicesHeadingRef}
-                            className="heading-2 max-w-md text-center md:max-w-150 lg:max-w-4xl"
-                        >
-                            {homeData.services.heading}
-                        </h2>
-                    </div>
+                    <SectionHeader title={homeData.services.heading} />
                     <div className="w-full">
                         <div
                             ref={servicesContainerRef}

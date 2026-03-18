@@ -1,9 +1,6 @@
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import { useReducedMotion, motion, MotionConfig } from "motion/react";
 import Image, { StaticImageData } from "next/image";
-import React, { useRef } from "react";
-
-gsap.registerPlugin(useGSAP);
+import React, { useEffect, useRef, useState } from "react";
 
 interface Props {
     treatment: {
@@ -15,117 +12,120 @@ interface Props {
 }
 
 const ServicesSectionCard = ({ treatment }: Props) => {
-    const tl = useRef<gsap.core.Timeline>(null);
-    const serviceCardOverlayRef = useRef<HTMLDivElement>(null);
+    const reduceMotion = useReducedMotion();
     const serviceCardTextPartRef = useRef<HTMLDivElement>(null);
-    const serviceCardImageRef = useRef<HTMLImageElement>(null);
+    const [textOffsetY, setTextOffsetY] = useState(0);
+    const [isDesktop, setIsDesktop] = useState(false);
 
-    const { contextSafe } = useGSAP(() => {
-        if (!serviceCardTextPartRef.current) return;
+    useEffect(() => {
+        const checkDesktop = () => {
+            const desktop = window.matchMedia("(min-width: 1024px)").matches;
+            setIsDesktop(desktop);
 
-        // for the sake of smooth animation we are letting gsap to set transform on card
-        const mm = gsap.matchMedia();
+            // Calculate offset only on desktop
+            if (desktop && serviceCardTextPartRef.current) {
+                const height = serviceCardTextPartRef.current.clientHeight;
+                setTextOffsetY(height - 33);
+            } else {
+                setTextOffsetY(0);
+            }
+        };
+        checkDesktop();
+        window.addEventListener("resize", checkDesktop);
+        return () => window.removeEventListener("resize", checkDesktop);
+    }, []);
 
-        mm.add(
-            {
-                isDesktop: "(min-width: 1024px)",
-                reduceMotion: "(prefers-reduced-motion: reduce)",
-            },
-            (context) => {
-                const { isDesktop, reduceMotion } = context.conditions as {
-                    isDesktop: boolean;
-                    reduceMotion: boolean;
-                };
+    const shouldAnimate = isDesktop && !reduceMotion;
 
-                if (isDesktop && !reduceMotion) {
-                    const height = serviceCardTextPartRef.current!.clientHeight;
+    // ============================================
+    // ANIMATION VARIANTS
+    // ============================================
 
-                    gsap.set(serviceCardTextPartRef.current, {
-                        y: height - 33,
-                    });
+    // Container variant - controls all children
+    const cardVariants = {
+        rest: {},
+        hover: {},
+    };
 
-                    // Create the timeline to use in handlers and pause it initially
-                    tl.current = gsap
-                        .timeline({
-                            paused: true,
-                            defaults: {
-                                duration: 0.3,
-                                ease: "power2.inOut",
-                            },
-                        })
-                        .to(serviceCardOverlayRef.current, {
-                            opacity: 0.4,
-                        })
-                        .to(
-                            serviceCardImageRef.current,
-                            {
-                                scale: 1,
-                            },
-                            "<",
-                        )
-                        .to(
-                            serviceCardTextPartRef.current,
-                            {
-                                y: 0,
-                            },
-                            "<",
-                        );
-                }
-            },
-        );
+    // Overlay variant
+    const overlayVariants = {
+        rest: {
+            opacity: 0.2,
+        },
+        hover: {
+            opacity: 0.4,
+        },
+    };
 
-        return () => mm.revert();
-    });
+    // Image variant
+    const imageVariants = {
+        rest: {
+            scale: shouldAnimate ? 1.1 : 1,
+        },
+        hover: {
+            scale: 1,
+        },
+    };
 
-    // eslint-disable-next-line react-hooks/refs
-    const handleMouseEnterCard = contextSafe(() => {
-        tl.current?.play();
-    });
-    // eslint-disable-next-line react-hooks/refs
-    const handleMouseLeaveCard = contextSafe(() => {
-        tl.current?.timeScale(1.5).reverse();
-    });
+    // Text variant
+    const textVariants = {
+        rest: {
+            y: shouldAnimate ? textOffsetY : 0,
+        },
+        hover: {
+            y: 0,
+        },
+    };
 
     return (
-        <div
-            onMouseEnter={handleMouseEnterCard}
-            onMouseLeave={handleMouseLeaveCard}
-            className="motion-safe:2xl:max-w-1/3 relative h-135 w-full shrink-0 overflow-hidden rounded-4 md:rounded-5 motion-safe:md:max-w-125 lg:rounded-6 2xl:aspect-500/540 2xl:h-full"
-        >
-            <div className="img-container relative h-full w-full">
-                <Image
-                    ref={serviceCardImageRef}
-                    src={treatment.img}
-                    alt={treatment.name}
-                    width={500}
-                    height={540}
-                    quality={100}
-                    className="h-full w-full object-cover motion-safe:lg:scale-110 motion-safe:lg:will-change-transform"
-                />
-                <div
-                    ref={serviceCardOverlayRef}
-                    className="absolute top-0 right-0 bottom-0 left-0 bg-bg-base-inverse opacity-20"
-                />
-            </div>
-            <div
-                ref={serviceCardTextPartRef}
-                className="text-details absolute bottom-6 left-6 z-10 flex flex-col gap-4 motion-safe:lg:will-change-transform"
+        <MotionConfig transition={{ type: "spring", duration: 0.3, bounce: 0 }}>
+            <motion.div
+                key={textOffsetY}
+                variants={cardVariants}
+                initial="rest"
+                whileHover={shouldAnimate ? "hover" : "rest"}
+                className="relative h-135 w-full shrink-0 overflow-hidden rounded-4 md:rounded-5 motion-safe:md:max-w-125 lg:rounded-6 2xl:aspect-500/540 2xl:h-full motion-safe:2xl:max-w-1/3"
             >
-                <h3 className="heading-3-body text-text-on-color">
-                    {treatment.name}
-                </h3>
-                <div className="services flex flex-col gap-0">
-                    {treatment.services.map((service) => (
-                        <span
-                            key={service}
-                            className="paragraph-2 text-text-on-color"
-                        >
-                            {service}
-                        </span>
-                    ))}
+                <div className="img-container relative h-full w-full">
+                    <motion.div
+                        variants={imageVariants}
+                        className="h-full w-full motion-safe:lg:will-change-transform"
+                    >
+                        <Image
+                            src={treatment.img}
+                            alt={treatment.name}
+                            width={500}
+                            height={540}
+                            quality={100}
+                            className="h-full w-full object-cover"
+                        />
+                    </motion.div>
+                    <motion.div
+                        variants={overlayVariants}
+                        className="absolute top-0 right-0 bottom-0 left-0 bg-bg-base-inverse"
+                    />
                 </div>
-            </div>
-        </div>
+                <motion.div
+                    ref={serviceCardTextPartRef}
+                    variants={textVariants}
+                    className="text-details absolute bottom-6 left-6 z-10 flex flex-col gap-4 motion-safe:lg:will-change-transform"
+                >
+                    <h3 className="heading-3-body text-text-on-color">
+                        {treatment.name}
+                    </h3>
+                    <div className="services flex flex-col gap-0">
+                        {treatment.services.map((service) => (
+                            <span
+                                key={service}
+                                className="paragraph-2 text-text-on-color"
+                            >
+                                {service}
+                            </span>
+                        ))}
+                    </div>
+                </motion.div>
+            </motion.div>
+        </MotionConfig>
     );
 };
 
