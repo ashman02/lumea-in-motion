@@ -6,11 +6,15 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import ServicesSectionCard from "./components/ServicesSectionCard";
 import TestimonialSection from "./components/TestimonialSection";
-import { motion, useScroll, useTransform } from "motion/react";
+import {
+    motion,
+    useReducedMotion,
+    useScroll,
+    useTransform,
+} from "motion/react";
 import SectionHeader from "./components/SectionHeader";
 
 export default function Home() {
-    const servicesSectionRef = useRef<HTMLDivElement>(null);
     const servicesWrapperRef = useRef<HTMLDivElement>(null);
     const servicesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -24,10 +28,32 @@ export default function Home() {
     const resultWrapperRef = useRef<HTMLDivElement>(null);
     const resultImagesContainerRef = useRef<HTMLDivElement>(null);
 
+    const reduceMotion = useReducedMotion();
     const [scrollDistance, setScrollDistance] = useState(0);
+    const [heightValue, setHeightValue] = useState<string>("auto");
+
+    useEffect(() => {
+        if (reduceMotion === false && scrollDistance > 0) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setHeightValue(`calc(100vh + ${scrollDistance}px)`);
+        } else {
+            setHeightValue("auto");
+        }
+    }, [reduceMotion, scrollDistance]);
 
     // Calculate real horizontal scroll distance
     useEffect(() => {
+        // Skip calculation if reduce motion is enabled
+        if (reduceMotion === true) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setScrollDistance(0);
+            return;
+        }
+
+        // Don't calculate until we know the motion preference
+        if (reduceMotion === null) {
+            return;
+        }
         const calculateDistance = () => {
             if (!servicesContainerRef.current) return;
 
@@ -52,7 +78,7 @@ export default function Home() {
         window.addEventListener("resize", calculateDistance);
 
         return () => window.removeEventListener("resize", calculateDistance);
-    }, []);
+    }, [reduceMotion]);
 
     // Start getting scroll progress when our wrappers hit's the top of viewport
     const { scrollYProgress } = useScroll({
@@ -63,7 +89,11 @@ export default function Home() {
     // Now we have scroll progress number from 0 - 1.
     // we are going to useTransform to calculate the translateX value
     // 0 = 0px and 1 = end value
-    const xValue = useTransform(scrollYProgress, [0, 1], [0, -scrollDistance]);
+    const xValue = useTransform(
+        scrollYProgress,
+        [0, 1],
+        reduceMotion ? [0, 0] : [0, -scrollDistance],
+    );
 
     return (
         <main>
@@ -134,10 +164,7 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-            <section
-                ref={servicesSectionRef}
-                className="services-section section-container"
-            >
+            <section className="services-section section-container">
                 <div className="flex items-center justify-center px-6 pt-12 md:px-8 md:pt-16 lg:px-16 lg:pt-21">
                     <SectionHeader title={homeData.services.heading} />
                 </div>
@@ -145,17 +172,17 @@ export default function Home() {
                 <div
                     ref={servicesWrapperRef}
                     className="relative"
+                    // We need screen height + scroll distance for accurate scrolling
                     style={{
-                        // We need screen height + scroll distance for accurate scrolling
-                        height: `calc(100vh + ${scrollDistance}px)`,
+                        height: heightValue,
                     }}
                 >
                     {/* This is our sticky container */}
-                    <div className="sticky top-0 h-screen overflow-hidden">
+                    <div className="sticky top-0 h-screen overflow-hidden motion-reduce:static motion-reduce:h-full">
                         <motion.div
                             ref={servicesContainerRef}
                             style={{ x: xValue }}
-                            className="flex h-full gap-4 py-8 pl-6 md:gap-5 md:py-12 md:pl-8 lg:gap-6 lg:pl-16"
+                            className="flex h-full grid-cols-1 gap-4 px-6 py-8 motion-reduce:grid md:grid-cols-2 md:gap-5 md:px-8 md:py-12 lg:gap-6 lg:px-16 2xl:grid-cols-3"
                         >
                             {homeData.services.treatments.map((t) => (
                                 <ServicesSectionCard key={t.id} treatment={t} />
