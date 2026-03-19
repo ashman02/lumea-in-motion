@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
-import SmoothScrollerProvider from "./components/SmoothScrollerProvider";
 import Navbar from "./components/Navbar";
 
 const headingFont = Playfair_Display({
@@ -30,7 +29,7 @@ export default function RootLayout({
                 className={`${headingFont.variable} ${secondaryFont.variable} antialiased`}
             >
                 <Navbar />
-                <SmoothScrollerProvider>{children}</SmoothScrollerProvider>
+                {children}
             </body>
         </html>
     );

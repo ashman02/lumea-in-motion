@@ -3,10 +3,10 @@ import Image from "next/image";
 import { homeData } from "./utils/data";
 import Button from "./components/Button";
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ServicesSectionCard from "./components/ServicesSectionCard";
 import TestimonialSection from "./components/TestimonialSection";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import SectionHeader from "./components/SectionHeader";
 
 export default function Home() {
@@ -23,6 +23,47 @@ export default function Home() {
     const resultSubheadingRef = useRef<HTMLParagraphElement>(null);
     const resultWrapperRef = useRef<HTMLDivElement>(null);
     const resultImagesContainerRef = useRef<HTMLDivElement>(null);
+
+    const [scrollDistance, setScrollDistance] = useState(0);
+
+    // Calculate real horizontal scroll distance
+    useEffect(() => {
+        const calculateDistance = () => {
+            if (!servicesContainerRef.current) return;
+
+            const containerWidth = servicesContainerRef.current.scrollWidth;
+
+            const viewportWidth = window.innerWidth;
+
+            // Add padding based on breakpoint
+            const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+            const isTablet =
+                window.matchMedia("(min-width: 768px)").matches && !isDesktop;
+            const padding = isDesktop ? 64 : isTablet ? 32 : 24;
+
+            // True distance. Total scroll width minus viewport width
+            const distance = containerWidth + padding - viewportWidth;
+
+            setScrollDistance(distance);
+        };
+        calculateDistance();
+
+        // In case there is resize in window we will recalculate the distance
+        window.addEventListener("resize", calculateDistance);
+
+        return () => window.removeEventListener("resize", calculateDistance);
+    }, []);
+
+    // Start getting scroll progress when our wrappers hit's the top of viewport
+    const { scrollYProgress } = useScroll({
+        target: servicesWrapperRef,
+        offset: ["start start", "end end"],
+    });
+
+    // Now we have scroll progress number from 0 - 1.
+    // we are going to useTransform to calculate the translateX value
+    // 0 = 0px and 1 = end value
+    const xValue = useTransform(scrollYProgress, [0, 1], [0, -scrollDistance]);
 
     return (
         <main>
@@ -97,20 +138,29 @@ export default function Home() {
                 ref={servicesSectionRef}
                 className="services-section section-container"
             >
+                <div className="flex items-center justify-center px-6 pt-12 md:px-8 md:pt-16 lg:px-16 lg:pt-21">
+                    <SectionHeader title={homeData.services.heading} />
+                </div>
+                {/* This is our main container that has height. */}
                 <div
                     ref={servicesWrapperRef}
-                    className="main-container vertical-flex items-center"
+                    className="relative"
+                    style={{
+                        // We need screen height + scroll distance for accurate scrolling
+                        height: `calc(100vh + ${scrollDistance}px)`,
+                    }}
                 >
-                    <SectionHeader title={homeData.services.heading} />
-                    <div className="w-full">
-                        <div
+                    {/* This is our sticky container */}
+                    <div className="sticky top-0 h-screen overflow-hidden">
+                        <motion.div
                             ref={servicesContainerRef}
-                            className="flex grid-cols-1 gap-4 motion-reduce:grid md:grid-cols-2 md:gap-5 lg:gap-6 2xl:grid-cols-3"
+                            style={{ x: xValue }}
+                            className="flex h-full gap-4 py-8 pl-6 md:gap-5 md:py-12 md:pl-8 lg:gap-6 lg:pl-16"
                         >
                             {homeData.services.treatments.map((t) => (
                                 <ServicesSectionCard key={t.id} treatment={t} />
                             ))}
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </section>
@@ -155,7 +205,7 @@ export default function Home() {
             <section className="result-section section-container">
                 <div
                     ref={resultWrapperRef}
-                    className="main-container vertical-flex"
+                    className="main-container vertical-flex overflow-hidden"
                 >
                     <div className="heading-subheading-container flex flex-col items-center gap-4 md:gap-8">
                         <div className="heading-container overflow-hidden">
